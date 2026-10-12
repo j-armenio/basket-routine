@@ -2,6 +2,7 @@ import { makeStyles } from '@/theme/makeStyles';
 import { useColors } from '@/theme/ThemeContext';
 import { radius, size, spacing } from '@/theme/spacing';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { AppText } from './AppText';
@@ -33,6 +34,7 @@ export function SwipeToDelete({
   testID,
   children,
 }: SwipeToDeleteProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const colors = useColors();
   const remove = () => {
@@ -58,7 +60,7 @@ export function SwipeToDelete({
           <View style={styles.action}>
             <Icon name="delete" size={size.icon} color={colors.onPrimary} />
             <AppText variant="subtitle" weight="bold" style={styles.actionText}>
-              Delete
+              {t('common.delete')}
             </AppText>
           </View>
         )}

@@ -4,7 +4,7 @@ import type { TacticalBoard } from '@/domain/tacticalBoard';
 import { count, eq } from 'drizzle-orm';
 import { exercises, sessionExercises, sessionSets, sessions } from '../schema';
 import { seedExercises } from '../seed/seed';
-import { createTestDb } from '../test-utils';
+import { addWorkoutExercise, createTestDb, createWorkout, renameWorkout } from '../test-utils';
 import type { Db } from '../types';
 import { archiveCustomExercise, createCustomExercise, listExercises } from './exercises';
 import { createRoutine } from './routines';
@@ -29,13 +29,7 @@ import {
   updateSessionExerciseNote,
   updateSessionSet,
 } from './sessions';
-import {
-  addWorkoutExercise,
-  archiveWorkout,
-  createWorkout,
-  getWorkoutWithExercises,
-  renameWorkout,
-} from './workouts';
+import { archiveWorkout, getWorkoutWithExercises } from './workouts';
 
 const exerciseId = (db: Db, seedKey: string) =>
   db.select().from(exercises).where(eq(exercises.seedKey, seedKey)).get()!.id;

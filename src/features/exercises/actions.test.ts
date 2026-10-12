@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { getExercise, listExercises } from '@/db/repositories/exercises';
 import { createRoutine } from '@/db/repositories/routines';
-import { addWorkoutExercise, createWorkout } from '@/db/repositories/workouts';
+import { addWorkoutExercise, createWorkout } from '@/db/test-utils';
 import type { Db } from '@/db/types';
 import { subscribe, type ActionResult } from '../dataStore';
 import { createExercise, deleteExercise, exerciseUsage, updateExercise } from './actions';

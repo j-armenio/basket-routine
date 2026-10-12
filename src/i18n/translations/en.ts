@@ -37,7 +37,6 @@ const en = {
     closeMenu: 'Close menu',
     delete: 'Delete',
     edit: 'Edit',
-    done: 'Done',
     name: 'Name',
     moveUp: 'Move up',
     moveDown: 'Move down',
@@ -70,10 +69,6 @@ const en = {
       makes_attempts: 'Makes / Attempts',
       check: 'Check',
     },
-    targetMode: {
-      makes: 'Makes',
-      attempts: 'Attempts',
-    },
   },
   tabs: {
     workout: 'Workout',
@@ -90,17 +85,11 @@ const en = {
     },
     themeHint: "System follows your phone's setting.",
     language: 'Language',
-    noSettingsTitle: 'No settings yet',
-    noSettingsMessage: 'Settings will show up here.',
     version: 'Basket Routine {{version}}',
   },
   languagePicker: {
     title: 'Choose your language',
     confirm: 'Confirm',
-  },
-  languages: {
-    en: 'English',
-    'pt-BR': 'Português (Brasil)',
   },
   workout: {
     columnSet: 'SET',
@@ -198,7 +187,6 @@ const en = {
   history: {
     title: 'History',
     seeAll: 'See all',
-    yourStats: 'Your stats',
     evolutionTitle: 'FG% evolution',
     latestWorkout: 'latest workout',
     chartRangeAccessibility: 'Chart range, {{range}}',
@@ -235,7 +223,6 @@ const en = {
   },
   exercises: {
     title: 'Exercises',
-    newExercise: 'New exercise',
     exerciseCount_one: '{{count}} exercise',
     exerciseCount_other: '{{count}} exercises',
     noExercisesFound: 'No exercises found',
@@ -267,9 +254,7 @@ const en = {
     description: 'Description',
     descriptionPlaceholder: 'How to do the drill',
     videoTooLong: 'Choose a video of 30 seconds or less.',
-    unsupportedImageType: "This file type isn't supported. Choose an image.",
     unsupportedMediaType: "This file type isn't supported. Choose an image, a GIF or a video.",
-    addFailedTitle: "Couldn't add exercise",
     notFoundCategoryTitle: 'Category not found',
     notFoundCategoryMessage: "This category doesn't exist.",
     deleteFailedTitle: "Couldn't delete exercise",

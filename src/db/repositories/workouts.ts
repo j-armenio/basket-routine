@@ -30,7 +30,7 @@ export function requireActiveWorkout(db: Db, id: number): Workout {
 }
 
 /** Appended at the end of the routine's workouts. */
-function insertWorkout(db: Db, routineId: number, name: string): Workout {
+export function insertWorkout(db: Db, routineId: number, name: string): Workout {
   requireActiveRoutine(db, routineId);
   const last = db
     .select({ value: max(workouts.position) })
@@ -42,18 +42,6 @@ function insertWorkout(db: Db, routineId: number, name: string): Workout {
     .values({ routineId, name, position: nextPosition(last?.value) })
     .returning()
     .get();
-}
-
-/** Appended at the end of the routine's workouts. */
-export function createWorkout(db: Db, routineId: number, name: string): Workout {
-  const trimmed = requireName(name);
-  return db.transaction((tx) => insertWorkout(tx, routineId, trimmed));
-}
-
-export function renameWorkout(db: Db, id: number, name: string): Workout {
-  const trimmed = requireName(name);
-  requireActiveWorkout(db, id);
-  return db.update(workouts).set({ name: trimmed }).where(eq(workouts.id, id)).returning().get();
 }
 
 export function archiveWorkout(db: Db, id: number): void {
@@ -89,7 +77,7 @@ export interface WorkoutExerciseInput {
 }
 
 /** Appends the exercise and its sets after validating them. No transaction of its own. */
-function insertWorkoutExercise(
+export function insertWorkoutExercise(
   db: Db,
   workoutId: number,
   exerciseId: number,
@@ -138,18 +126,6 @@ function insertWorkoutExercise(
     )
     .run();
   return workoutExercise;
-}
-
-export function addWorkoutExercise(
-  db: Db,
-  workoutId: number,
-  exerciseId: number,
-  input: WorkoutExerciseInput,
-): WorkoutExercise {
-  return db.transaction((tx) => {
-    requireActiveWorkout(tx, workoutId);
-    return insertWorkoutExercise(tx, workoutId, exerciseId, input);
-  });
 }
 
 export interface WorkoutExerciseItem extends WorkoutExerciseInput {

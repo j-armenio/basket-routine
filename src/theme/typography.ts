@@ -1,7 +1,7 @@
 import type { TextStyle } from 'react-native';
 import { fonts } from './fonts';
 
-// The type scale of design-handoff/tokens.json. Android doesn't pick a font file from
+// The type scale (the roles are in docs/design.md). Android doesn't pick a font file from
 // `fontWeight`, so each weight is its own family and no variant sets `fontWeight`.
 export const typography = {
   /** Tab screen titles (Workout, Exercises, History) and the summary's. */

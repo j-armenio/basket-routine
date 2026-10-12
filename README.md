@@ -4,7 +4,7 @@ An Android-only, personal-use app for logging basketball training routines. It f
 routines → workout templates → active workout → history flow, tracking **Attempts / Makes**
 per set with automatically derived FG%.
 
-See [docs/plan/PLAN.md](docs/plan/PLAN.md) for the full development plan.
+The original development plan and the per-phase plans are kept as history in [docs/archive/](docs/archive/). Project rules and structure: [CLAUDE.md](CLAUDE.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Development
 

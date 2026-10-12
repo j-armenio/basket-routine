@@ -1,7 +1,6 @@
 # Backlog
 
-Pending items that sit outside the phases in `docs/plan/`: known issues left open, content still
-to come, and ideas for after v1. Each item says where it came from.
+Pending items: known issues left open, content still to come, and ideas for after v1. Each item says where it came from.
 
 ## Known issues
 
@@ -31,7 +30,7 @@ to come, and ideas for after v1. Each item says where it came from.
 
 ## Post-v1 (optional)
 
-From `PLAN.md`'s former backlog section and the phases' out-of-scope lists.
+From the archived plan's former backlog section and the phases' out-of-scope lists (`docs/archive/`).
 
 - "Previous" column showing the last performance per exercise during the active workout.
 - Session duration and rest timers (the summary shows the duration, computed once).
@@ -42,13 +41,13 @@ From `PLAN.md`'s former backlog section and the phases' out-of-scope lists.
 - Fine-grained "update template" (a diff instead of the full overwrite).
 - Drag & drop reordering for what still only has Move up / Move down: the workouts inside a
   routine (`WorkoutCard`'s menu). A template's exercises (`DraggableExerciseList`) already drag since Phase 9;
-  routines (chips since Phase 9.6) move only through their menu's Move left / Move right.
+  routines (chips) move only through their menu's Move left / Move right.
 - **JSON export / import backup**, asked for 2026-09-30 after Phase 9's Profile/Settings work: a
-  real APK with months of history is now on the phone, Android Auto Backup (`PLAN.md`'s accepted
+  real APK with months of history is now on the phone, Android Auto Backup (the original plan's accepted
   risk) is a best-effort fallback at most — its default 25 MB quota and its own schedule (wifi,
   charging, idle) leave it unverified for whether it actually restores the profile photo and
   exercise media files alongside the SQLite DB, and it never gives someone their own copy of their
-  data — and `app/settings.tsx` is empty and the obvious place to put this. Shape it like an
+  data — and `app/settings.tsx` (Appearance and Language today) is the obvious place to put this. Shape it like an
   exercise's or the profile's media handling (`copySync` through `expo-file-system`, actions in
   their own `actions.ts`): "Export backup" writes one JSON file (the DB tables plus the profile
   name, with the photo and exercise media files either inlined as base64 or referenced by relative

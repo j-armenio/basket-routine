@@ -18,8 +18,6 @@ type Variant =
   | 'ghost'
   /** A destructive action (Discard Workout). */
   | 'danger'
-  /** The green pill (New Routine). */
-  | 'tonal'
   /** The dashed green outline (New Workout). */
   | 'dashed'
   /** The green outline (Choose media). */
@@ -92,17 +90,6 @@ const buildVariants = (colors: Palette): Record<Variant, VariantStyle> => ({
     text: 'body',
     weight: 'bold',
     iconSize: size.iconButtonGlyph,
-  },
-  tonal: {
-    container: {
-      minHeight: size.minTouchTarget,
-      paddingHorizontal: spacing.lg + spacing.xxs,
-      borderRadius: radius.chip,
-      backgroundColor: colors.secondary,
-    },
-    textColor: colors.onSecondary,
-    text: 'buttonCompact',
-    iconSize: size.iconSmall,
   },
   dashed: {
     container: {

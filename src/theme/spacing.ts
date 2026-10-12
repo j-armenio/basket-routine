@@ -1,4 +1,4 @@
-// Spacing, radii and sizes of design-handoff/tokens.json, plus the in-between steps the mockups use.
+// Spacing, radii and sizes (the roles are in docs/design.md), plus the in-between steps the mockups use.
 export const spacing = {
   xxs: 2,
   xs: 4,
@@ -13,10 +13,8 @@ export const spacing = {
   lg: 16,
   xl: 20,
   xxl: 24,
-  xxxl: 32,
   // The named tokens.
   screenPadding: 16,
-  screenTop: 40,
   sectionGap: 16,
   cardPadding: 20,
   cardPaddingCompact: 16,

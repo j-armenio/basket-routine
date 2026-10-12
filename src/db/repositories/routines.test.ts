@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { DomainError } from '@/domain/errors';
 import { eq } from 'drizzle-orm';
-import { createTestDb } from '../test-utils';
+import { addWorkoutExercise, createTestDb, createWorkout } from '../test-utils';
 import { exercises } from '../schema';
 import { seedExercises } from '../seed/seed';
 import {
@@ -13,13 +13,7 @@ import {
   renameRoutine,
   reorderRoutines,
 } from './routines';
-import {
-  addWorkoutExercise,
-  archiveWorkout,
-  createWorkout,
-  getWorkout,
-  listWorkouts,
-} from './workouts';
+import { archiveWorkout, getWorkout, listWorkouts } from './workouts';
 
 describe('routines', () => {
   test('are appended at the end and listed by position', () => {

@@ -3,7 +3,7 @@ import { DomainError } from '@/domain/errors';
 import { exercises } from '../schema';
 import { SEED_EXERCISES } from '../seed/exercises';
 import { seedExercises } from '../seed/seed';
-import { createTestDb } from '../test-utils';
+import { addWorkoutExercise, createTestDb, createWorkout } from '../test-utils';
 import {
   archiveCustomExercise,
   archivedExerciseIds,
@@ -14,7 +14,6 @@ import {
   updateCustomExercise,
 } from './exercises';
 import { createRoutine, archiveRoutine } from './routines';
-import { addWorkoutExercise, createWorkout } from './workouts';
 
 const reasonOf = (fn: () => unknown) => {
   try {

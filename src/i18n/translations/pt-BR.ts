@@ -11,7 +11,6 @@ const ptBR: typeof en = {
     closeMenu: 'Fechar menu',
     delete: 'Excluir',
     edit: 'Editar',
-    done: 'Concluído',
     name: 'Nome',
     moveUp: 'Mover para cima',
     moveDown: 'Mover para baixo',
@@ -44,10 +43,6 @@ const ptBR: typeof en = {
       makes_attempts: 'Acertos / Tentativas',
       check: 'Concluído',
     },
-    targetMode: {
-      makes: 'Acertos',
-      attempts: 'Tentativas',
-    },
   },
   tabs: {
     workout: 'Treino',
@@ -64,17 +59,11 @@ const ptBR: typeof en = {
     },
     themeHint: 'Sistema segue a configuração do seu celular.',
     language: 'Idioma',
-    noSettingsTitle: 'Ainda não há configurações',
-    noSettingsMessage: 'As configurações vão aparecer aqui.',
     version: 'Basket Routine {{version}}',
   },
   languagePicker: {
     title: 'Escolha seu idioma',
     confirm: 'Confirmar',
-  },
-  languages: {
-    en: 'English',
-    'pt-BR': 'Português (Brasil)',
   },
   workout: {
     columnSet: 'SÉRIE',
@@ -175,7 +164,6 @@ const ptBR: typeof en = {
   history: {
     title: 'Histórico',
     seeAll: 'Ver tudo',
-    yourStats: 'Suas estatísticas',
     evolutionTitle: 'Evolução do FG%',
     latestWorkout: 'último treino',
     chartRangeAccessibility: 'Período do gráfico, {{range}}',
@@ -212,7 +200,6 @@ const ptBR: typeof en = {
   },
   exercises: {
     title: 'Exercícios',
-    newExercise: 'Novo exercício',
     exerciseCount_one: '{{count}} exercício',
     exerciseCount_other: '{{count}} exercícios',
     noExercisesFound: 'Nenhum exercício encontrado',
@@ -244,10 +231,8 @@ const ptBR: typeof en = {
     description: 'Descrição',
     descriptionPlaceholder: 'Como fazer o exercício',
     videoTooLong: 'Escolha um vídeo de 30 segundos ou menos.',
-    unsupportedImageType: 'Esse tipo de arquivo não é compatível. Escolha uma imagem.',
     unsupportedMediaType:
       'Esse tipo de arquivo não é compatível. Escolha uma imagem, um GIF ou um vídeo.',
-    addFailedTitle: 'Não foi possível adicionar o exercício',
     notFoundCategoryTitle: 'Categoria não encontrada',
     notFoundCategoryMessage: 'Essa categoria não existe.',
     deleteFailedTitle: 'Não foi possível excluir o exercício',

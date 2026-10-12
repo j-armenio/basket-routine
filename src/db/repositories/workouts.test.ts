@@ -4,17 +4,14 @@ import type { TacticalBoard } from '@/domain/tacticalBoard';
 import { count, eq } from 'drizzle-orm';
 import { exercises, templateSets, workouts } from '../schema';
 import { seedExercises } from '../seed/seed';
-import { createTestDb } from '../test-utils';
+import { addWorkoutExercise, createTestDb, createWorkout } from '../test-utils';
 import { archiveCustomExercise, createCustomExercise } from './exercises';
 import { createRoutine } from './routines';
 import { getSessionDetail, startSessionFromWorkout } from './sessions';
 import {
-  addWorkoutExercise,
   archiveWorkout,
-  createWorkout,
   getWorkoutWithExercises,
   listWorkouts,
-  renameWorkout,
   reorderWorkouts,
   replaceWorkoutExercises,
   saveWorkout,
@@ -42,67 +39,15 @@ function setup() {
   return { db, routine, workout };
 }
 
-describe('workouts', () => {
-  test('are created, renamed, ordered and archived', () => {
+describe('archiveWorkout', () => {
+  test('takes the workout out of the routine list, and only once', () => {
     const { db, routine, workout } = setup();
     const second = createWorkout(db, routine.id, 'Second');
-    expect(listWorkouts(db, routine.id).map((w) => w.position)).toEqual([0, 1]);
-    expect(renameWorkout(db, workout.id, 'First').name).toBe('First');
+
     archiveWorkout(db, workout.id);
+
     expect(listWorkouts(db, routine.id).map((w) => w.id)).toEqual([second.id]);
-    expect(reasonOf(() => renameWorkout(db, workout.id, 'x'))).toBe('not_found');
-  });
-
-  test('a workout needs an existing routine', () => {
-    const { db } = setup();
-    expect(reasonOf(() => createWorkout(db, 999, 'W'))).toBe('not_found');
-  });
-
-  test('addWorkoutExercise stores the exercise with its ordered sets', () => {
-    const { db, workout } = setup();
-    addWorkoutExercise(db, workout.id, exerciseId(db, 'free_throws'), {
-      targetMode: 'attempts',
-      targetValues: [10, 10, 5],
-    });
-    addWorkoutExercise(db, workout.id, exerciseId(db, 'figure_8'), {
-      targetValues: [null, null],
-    });
-
-    const detail = getWorkoutWithExercises(db, workout.id)!;
-    expect(detail.exercises.map((e) => e.exercise.name)).toEqual(['Free Throws', 'Figure 8']);
-    expect(detail.exercises[0].targetMode).toBe('attempts');
-    expect(detail.exercises[0].sets.map((s) => s.targetValue)).toEqual([10, 10, 5]);
-    expect(detail.exercises[1].targetMode).toBeNull();
-    expect(detail.exercises[1].sets.map((s) => s.position)).toEqual([0, 1]);
-  });
-
-  test('addWorkoutExercise validates against the exercise tracking type', () => {
-    const { db, workout } = setup();
-    const shooting = exerciseId(db, 'free_throws');
-    const check = exerciseId(db, 'figure_8');
-    const add = (id: number, targetMode: 'makes' | null, values: (number | null)[]) =>
-      reasonOf(() => addWorkoutExercise(db, workout.id, id, { targetMode, targetValues: values }));
-
-    expect(add(shooting, null, [10])).toBe('target_mode_required');
-    expect(add(check, 'makes', [null])).toBe('target_mode_not_allowed');
-    expect(add(shooting, 'makes', [])).toBe('invalid_set_count');
-    expect(add(shooting, 'makes', [0])).toBe('invalid_target_value');
-    expect(add(shooting, 'makes', [null])).toBe('invalid_target_value');
-    expect(add(check, null, [3])).toBe('value_not_allowed');
-    expect(getWorkoutWithExercises(db, workout.id)!.exercises).toEqual([]);
-  });
-
-  test('a bad set in the middle rolls the whole exercise back', () => {
-    const { db, workout } = setup();
-    expect(
-      reasonOf(() =>
-        addWorkoutExercise(db, workout.id, exerciseId(db, 'free_throws'), {
-          targetMode: 'makes',
-          targetValues: [5, 0],
-        }),
-      ),
-    ).toBe('invalid_target_value');
-    expect(getWorkoutWithExercises(db, workout.id)!.exercises).toEqual([]);
+    expect(reasonOf(() => archiveWorkout(db, workout.id))).toBe('not_found');
   });
 });
 
@@ -271,6 +216,31 @@ describe('saveWorkout', () => {
     archiveWorkout(db, workout.id);
     expect(save({ workoutId: workout.id })).toBe('not_found');
     expect(workoutCount(db)).toBe(1);
+  });
+
+  test('each exercise is validated against its tracking type', () => {
+    const { db, routine } = setup();
+    const shooting = exerciseId(db, 'free_throws');
+    const check = exerciseId(db, 'figure_8');
+    const reject = (
+      exerciseId: number,
+      targetMode: 'makes' | null,
+      targetValues: (number | null)[],
+    ) =>
+      reasonOf(() =>
+        saveWorkout(db, {
+          routineId: routine.id,
+          name: 'X',
+          exercises: [{ exerciseId, targetMode, targetValues }],
+        }),
+      );
+
+    expect(reject(shooting, null, [10])).toBe('target_mode_required');
+    expect(reject(check, 'makes', [null])).toBe('target_mode_not_allowed');
+    expect(reject(shooting, 'makes', [])).toBe('invalid_set_count');
+    expect(reject(shooting, 'makes', [0])).toBe('invalid_target_value');
+    expect(reject(shooting, 'makes', [null])).toBe('invalid_target_value');
+    expect(reject(check, null, [3])).toBe('value_not_allowed');
   });
 
   test('an archived exercise is refused', () => {

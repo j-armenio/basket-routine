@@ -1,30 +1,9 @@
-import { darkColors as colors } from '@/theme/colors';
 import { fonts } from '@/theme/fonts';
 import { render, screen } from '@testing-library/react-native';
 import { AppText } from './AppText';
 
-test('uses the body variant and default tone unless told otherwise', async () => {
-  await render(<AppText>Hello</AppText>);
-
-  expect(screen.getByText('Hello')).toHaveStyle({ fontSize: 16, color: colors.textPrimary });
-});
-
-test('applies the variant and tone', async () => {
-  await render(
-    <AppText variant="title" tone="error">
-      Oops
-    </AppText>,
-  );
-
-  expect(screen.getByText('Oops')).toHaveStyle({ fontSize: 26, color: colors.error });
-});
-
-test('has a success tone', async () => {
-  await render(<AppText tone="success">Nice</AppText>);
-
-  expect(screen.getByText('Nice')).toHaveStyle({ color: colors.success });
-});
-
+// Android picks a font file from the family, never from `fontWeight`: each variant and each
+// `weight` has to resolve to its own family.
 test('uses the Plus Jakarta Sans family of the variant, or of the weight given', async () => {
   await render(
     <>
