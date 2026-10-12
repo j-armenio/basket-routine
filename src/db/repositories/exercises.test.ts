@@ -1,6 +1,7 @@
 /** @jest-environment node */
 import { DomainError } from '@/domain/errors';
 import { exercises } from '../schema';
+import { SEED_EXERCISES } from '../seed/exercises';
 import { seedExercises } from '../seed/seed';
 import { createTestDb } from '../test-utils';
 import {
@@ -31,12 +32,12 @@ describe('exercises', () => {
     seedExercises(db);
 
     const all = listExercises(db);
-    expect(all).toHaveLength(38);
+    expect(all).toHaveLength(SEED_EXERCISES.length);
     const names = all.map((e) => e.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
 
     const shooting = listExercises(db, { category: 'shooting' });
-    expect(shooting).toHaveLength(9);
+    expect(shooting).toHaveLength(SEED_EXERCISES.filter((e) => e.category === 'shooting').length);
     expect(shooting.every((e) => e.category === 'shooting')).toBe(true);
 
     expect(listExercises(db, { search: 'free THROW' }).map((e) => e.name)).toEqual(['Free Throws']);

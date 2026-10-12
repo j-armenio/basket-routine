@@ -208,7 +208,7 @@ describe('the Exercises tab', () => {
     await openExercisesTab(user);
 
     expect(screen.getByRole('header', { name: 'Exercises' })).toBeOnTheScreen();
-    expect(screen.getByText('38 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('44 exercises')).toBeOnTheScreen();
     for (const [label, category] of [
       ['Finishing', 'finishing'],
       ['Ball Handling', 'ball_handling'],
@@ -239,7 +239,7 @@ describe('the Exercises tab', () => {
     expect(screen.queryByText('Mikan Drill')).toBeNull();
     expect(screen.queryByRole('button', { name: /^Shooting, / })).toBeNull();
     // the count is the catalog's, not the result's
-    expect(screen.getByText('38 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('44 exercises')).toBeOnTheScreen();
     expectAccessibleControls();
 
     await user.clear(screen.getByLabelText('Search exercises'));
@@ -282,7 +282,7 @@ describe('the Exercises tab', () => {
     const user = setupUser();
     await openExercisesTab(user);
 
-    expect(screen.getByText('40 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('46 exercises')).toBeOnTheScreen();
     await user.press(card('Custom, 2 exercises'));
 
     expect(app.getPathname()).toBe('/category/custom');
@@ -317,7 +317,7 @@ describe('the Exercises tab', () => {
 
     await openExercisesTab(user);
 
-    expect(screen.getByText('39 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('45 exercises')).toBeOnTheScreen();
     // the seeded ones plus the new one
     expect(card(`Shooting, ${seededIn('shooting')} exercises`)).toBeOnTheScreen();
     expect(card('Custom, 1 exercise')).toBeOnTheScreen();
@@ -403,12 +403,12 @@ describe('the exercise detail', () => {
     const user = setupUser();
     await openExercisesTab(user);
 
-    await openDetail(user, 'Free Throws');
+    await openDetail(user, 'Bank Shots');
 
-    expect(app.getPathname()).toBe(`/exercise/${exerciseId('free_throws')}`);
-    expect(screen.getByRole('header', { name: 'Free Throws' })).toBeOnTheScreen();
+    expect(app.getPathname()).toBe(`/exercise/${exerciseId('bank_shots')}`);
+    expect(screen.getByRole('header', { name: 'Bank Shots' })).toBeOnTheScreen();
     expect(screen.getByText('Shooting · Makes / Attempts')).toBeOnTheScreen();
-    expect(screen.getByText(seeded('free_throws').description)).toBeOnTheScreen();
+    expect(screen.getByText(seeded('bank_shots').description)).toBeOnTheScreen();
     expect(screen.queryByText(/Predefined exercise/)).toBeNull();
     expect(bigMedia().getByTestId('media-placeholder', HIDDEN)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Exercise menu' })).toBeNull();
@@ -532,7 +532,7 @@ describe('creating', () => {
     });
     expect(created.mediaUrl).toMatch(/^file:\/\/\/docs\/exercise-media\/.+\.mp4$/);
     expect([...files]).toEqual([created.mediaUrl]);
-    expect(screen.getByText('39 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('45 exercises')).toBeOnTheScreen();
     await search(user, 'slalom');
     expect(screen.getByText('Check · Custom')).toBeOnTheScreen();
     expect(within(rowOf('Cone Slalom')).getByTestId('media-video-still', HIDDEN)).toBeOnTheScreen();
@@ -685,7 +685,7 @@ describe('deleting', () => {
 
     expect(app.getPathname()).toBe('/exercises');
     expect(screen.queryByText('Exercise not found')).toBeNull();
-    expect(screen.getByText('38 exercises')).toBeOnTheScreen();
+    expect(screen.getByText('44 exercises')).toBeOnTheScreen();
     expect(screen.queryByText('Deep Threes')).toBeNull();
     expect(getExercise(db, custom.id)?.archivedAt).toBeInstanceOf(Date);
     expect(getWorkoutWithExercises(db, workout.id)!.exercises.map((e) => e.exercise.name)).toEqual([

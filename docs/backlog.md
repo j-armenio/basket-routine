@@ -17,10 +17,12 @@ to come, and ideas for after v1. Each item says where it came from.
 
 ## Content
 
-- **Media for the 38 predefined exercises** (Phase 6), supplied by the developer. One file per
+- **Media for the 44 predefined exercises** (Phase 6), supplied by the developer. 10 done so far (Form Shooting, Free Throws, Step-Back Jumpers, Pull-Up Jumpers and six new shooting drills); the other 34 show the placeholder. One file per
   exercise in `assets/exercises/<seedKey>.<ext>` (image, GIF, or video up to 30 s, kept small since
   it ships in the APK) plus its line in `src/features/exercises/seedMedia.ts`; `npm test` names a
-  missing line. Until then they show the placeholder.
+  missing line. Recommended format: vertical MP4, 270 × 480,
+  15 fps, 2-4 s, under ~300 KB; drop the originals in `media-source/` and run `scripts/optimize-exercise-media.sh`
+  (crops black bars, writes `media-source/optimized/`).
 - **Images for the 6 category cards** (Phase 9), supplied by the developer. One image per card of
   the Exercises tab in `assets/categories/<key>.jpg` (`finishing`, `ball_handling`, `dribbling`,
   `shooting`, `footwork`, `custom`; jpg, png or webp, about 800 px wide) plus its line in

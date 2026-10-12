@@ -47,7 +47,7 @@ test('starts on Workout and switches between the three tabs', async () => {
 
   await user.press(screen.getByRole('tab', { name: 'Exercises' }));
   expect(app.getPathname()).toBe('/exercises');
-  expect(screen.getByText('38 exercises')).toBeOnTheScreen();
+  expect(screen.getByText('44 exercises')).toBeOnTheScreen();
   expectAccessibleControls();
 
   await user.press(screen.getByRole('tab', { name: 'Profile' }));

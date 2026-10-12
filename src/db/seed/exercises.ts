@@ -84,6 +84,36 @@ export const SEED_EXERCISES: SeedExercise[] = [
     'Bank Shots',
     'Shoot off the backboard from the 45-degree angles on both wings. Aim for the top corner of the square on the backboard.',
   ),
+  shooting(
+    'double_between_pickup',
+    'Double Between Pickup',
+    'Two between-the-legs dribbles, then pick up the dribble and shoot. Stay low through the moves and land balanced into the shot.',
+  ),
+  shooting(
+    'hang_dribble_pull_up',
+    'Hang Dribble Pull-Up',
+    'Hang the ball with a hesitation dribble to freeze the defender, then explode into a pull-up jumper. Keep the shoulders square and go straight up.',
+  ),
+  shooting(
+    'in_and_out_crossover',
+    'In-and-Out Crossover',
+    'Sell an in-and-out dribble, cross over and rise into the jumper. Use the shoulders and hips to make the fake believable.',
+  ),
+  shooting(
+    'same_foot_punch_extra_side_step',
+    'Same-Foot Punch + Extra Side Step',
+    'Punch the same foot as the dribble hand, add an extra side step to create space, then shoot. Keep the ball tight through the step.',
+  ),
+  shooting(
+    'snatches',
+    'Snatches',
+    'Snatch the ball back in off the dribble, set your feet and shoot in one motion. Keep the ball tight until you rise.',
+  ),
+  shooting(
+    'turn_fade',
+    'Turn Fade',
+    'Dribble, turn your back to the defender and rise into a fadeaway jumper. Stay balanced and hold the follow-through.',
+  ),
   // Finishing
   finishing(
     'mikan_drill',

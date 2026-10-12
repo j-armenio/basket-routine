@@ -11,7 +11,7 @@ const cache = new Map<number | string, Promise<VideoThumbnail | null>>();
  * (`%2540jarmenio…` in the URI), so the path must be decoded first or the file isn't found.
  */
 export function thumbnailSource(source: number | string): number | string {
-  if (typeof source === 'number' || !source.startsWith('file://')) return source;
+  if (typeof source !== 'string' || !source.startsWith('file://')) return source;
   try {
     return `file://${decodeURIComponent(source.slice('file://'.length))}`;
   } catch {

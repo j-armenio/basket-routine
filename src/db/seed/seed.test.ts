@@ -12,15 +12,15 @@ describe('seedExercises', () => {
   test('inserts the whole catalog', () => {
     const db = createTestDb();
     seedExercises(db);
-    expect(total(db)).toBe(38);
-    expect(new Set(SEED_EXERCISES.map((e) => e.seedKey)).size).toBe(38);
+    expect(total(db)).toBe(SEED_EXERCISES.length);
+    expect(new Set(SEED_EXERCISES.map((e) => e.seedKey)).size).toBe(SEED_EXERCISES.length);
   });
 
   test('is idempotent', () => {
     const db = createTestDb();
     seedExercises(db);
     seedExercises(db);
-    expect(total(db)).toBe(38);
+    expect(total(db)).toBe(SEED_EXERCISES.length);
   });
 
   test('updates a changed description without touching custom exercises', () => {
@@ -50,7 +50,7 @@ describe('seedExercises', () => {
     const custom = db.select().from(exercises).where(eq(exercises.isCustom, true)).all();
     expect(custom).toHaveLength(1);
     expect(custom[0]).toMatchObject({ name: 'My drill', description: 'mine' });
-    expect(total(db)).toBe(39);
+    expect(total(db)).toBe(SEED_EXERCISES.length + 1);
   });
 
   test('never changes trackingType of an existing exercise', () => {
