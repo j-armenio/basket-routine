@@ -1,10 +1,11 @@
 import { Icon } from '@/components/Icon';
 import { TabBar, type TabBarProps } from '@/components/TabBar';
-import { colors } from '@/theme/colors';
+import { useColors } from '@/theme/ThemeContext';
 import { size } from '@/theme/spacing';
 import { ResumeBanner } from '@/features/workout/ResumeBanner';
 import type { AndroidSymbol } from 'expo-symbols';
 import { TopTabs } from 'expo-router/js-top-tabs';
+import { useTranslation } from 'react-i18next';
 import { useWindowDimensions, type ColorValue } from 'react-native';
 
 // The navigator's props are loosely typed, so the bar's and the icons' arguments are spelled out.
@@ -17,7 +18,9 @@ function tabIcon(name: AndroidSymbol) {
 // Material top tabs with the bar at the bottom: the pages sit in a native pager, so the screen
 // follows the finger sideways from one tab to the next.
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const { width } = useWindowDimensions();
+  const colors = useColors();
   return (
     <TopTabs
       tabBarPosition="bottom"
@@ -43,24 +46,24 @@ export default function TabsLayout() {
       <TopTabs.Screen
         name="index"
         options={{
-          title: 'Workout',
-          tabBarAccessibilityLabel: 'Workout',
+          title: t('tabs.workout'),
+          tabBarAccessibilityLabel: t('tabs.workout'),
           tabBarIcon: tabIcon('sports_basketball'),
         }}
       />
       <TopTabs.Screen
         name="exercises"
         options={{
-          title: 'Exercises',
-          tabBarAccessibilityLabel: 'Exercises',
+          title: t('tabs.exercises'),
+          tabBarAccessibilityLabel: t('tabs.exercises'),
           tabBarIcon: tabIcon('format_list_bulleted'),
         }}
       />
       <TopTabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarAccessibilityLabel: 'Profile',
+          title: t('tabs.profile'),
+          tabBarAccessibilityLabel: t('tabs.profile'),
           tabBarIcon: tabIcon('person'),
         }}
       />

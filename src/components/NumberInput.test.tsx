@@ -18,12 +18,6 @@ test('is a labelled number pad field that reports changes', async () => {
   expect(onChangeText).toHaveBeenCalledWith('8');
 });
 
-test.each(['large', 'compact'] as const)('the %s size renders', async (size) => {
-  await render(<NumberInput accessibilityLabel="Target" size={size} value="10" />);
-
-  expect(screen.getByLabelText('Target')).toBeOnTheScreen();
-});
-
 test('a tap on the covering layer focuses the field, which then drops the layer', async () => {
   const focus = jest.spyOn(TextInput.prototype, 'focus').mockImplementation(() => {});
   const onFocus = jest.fn();

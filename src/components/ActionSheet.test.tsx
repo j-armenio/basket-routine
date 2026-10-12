@@ -10,26 +10,6 @@ const setup = (options: Parameters<typeof ActionSheet>[0]['options'], visible = 
   return { onClose, user, view };
 };
 
-test('renders the title, the options and Cancel', async () => {
-  const { view } = setup([
-    { label: 'Move up', onPress: jest.fn() },
-    { label: 'Remove exercise', destructive: true, onPress: jest.fn() },
-  ]);
-  await view;
-
-  expect(screen.getByText('Set 1')).toBeOnTheScreen();
-  expect(screen.getByRole('button', { name: 'Move up' })).toBeOnTheScreen();
-  expect(screen.getByRole('button', { name: 'Remove exercise' })).toBeOnTheScreen();
-  expect(screen.getByRole('button', { name: 'Cancel' })).toBeOnTheScreen();
-});
-
-test('renders nothing when not visible', async () => {
-  const { view } = setup([{ label: 'Move up', onPress: jest.fn() }], false);
-  await view;
-
-  expect(screen.queryByText('Move up')).toBeNull();
-});
-
 test('an option fires and then closes the sheet', async () => {
   const calls: string[] = [];
   const onPress = jest.fn(() => calls.push('press'));

@@ -1,4 +1,5 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, radius, size, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useRef, useState } from 'react';
@@ -48,6 +49,8 @@ export function NumberInput({
   onBlur,
   ...props
 }: NumberInputProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const ref = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
 
@@ -93,7 +96,7 @@ export function NumberInput({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   base: {
     paddingHorizontal: spacing.sm,
     borderRadius: radius.cell,
@@ -118,4 +121,4 @@ const styles = StyleSheet.create({
   invalid: {
     borderColor: colors.error,
   },
-});
+}));

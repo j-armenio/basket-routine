@@ -1,7 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { radius, spacing } from '@/theme/spacing';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { TextField } from './TextField';
@@ -27,7 +28,7 @@ export function NameDialog({
   visible,
   title,
   initialName = '',
-  confirmLabel = 'Save',
+  confirmLabel,
   onConfirm,
   onClose,
 }: NameDialogProps) {
@@ -57,7 +58,10 @@ function DialogBody({
   confirmLabel,
   onConfirm,
   onClose,
-}: Required<Omit<NameDialogProps, 'visible'>>) {
+}: Required<Omit<NameDialogProps, 'visible' | 'confirmLabel'>> &
+  Pick<NameDialogProps, 'confirmLabel'>) {
+  const styles = useStyles();
+  const { t } = useTranslation();
   const [name, setName] = useState(initialName);
   const canSave = name.trim() !== '';
   const confirm = () => {
@@ -68,7 +72,7 @@ function DialogBody({
     <KeyboardAvoidingView behavior="padding" style={styles.root}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close dialog"
+        accessibilityLabel={t('common.closeDialog')}
         style={[StyleSheet.absoluteFill, styles.backdrop]}
         onPress={onClose}
       />
@@ -76,7 +80,7 @@ function DialogBody({
         <AppText variant="cardTitle">{title}</AppText>
         <TextField
           variant="raised"
-          accessibilityLabel="Name"
+          accessibilityLabel={t('common.name')}
           value={name}
           onChangeText={setName}
           autoFocus
@@ -85,15 +89,15 @@ function DialogBody({
           onSubmitEditing={confirm}
         />
         <View style={styles.actions}>
-          <Button variant="ghost" label="Cancel" onPress={onClose} />
-          <Button label={confirmLabel} disabled={!canSave} onPress={confirm} />
+          <Button variant="ghost" label={t('common.cancel')} onPress={onClose} />
+          <Button label={confirmLabel ?? t('common.save')} disabled={!canSave} onPress={confirm} />
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   root: {
     flex: 1,
     justifyContent: 'center',
@@ -113,4 +117,4 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: spacing.sm,
   },
-});
+}));

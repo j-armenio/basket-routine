@@ -5,11 +5,12 @@ import { Card } from '@/components/Card';
 import { IconButton } from '@/components/IconButton';
 import type { RoutineWithWorkouts } from '@/db/repositories/routines';
 import { moveItem } from '@/domain/order';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { spacing } from '@/theme/spacing';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
+import { Alert, View } from 'react-native';
 import { deleteRoutine, moveWorkout } from './actions';
 import { WorkoutCard } from './WorkoutCard';
 
@@ -22,16 +23,11 @@ type RoutineSectionProps = {
   onNewWorkout: () => void;
   onEditWorkout: (workoutId: number) => void;
   onStartWorkout: (workoutId: number) => void;
-  /** Holding the name to drag the section and reorder it: on activation, on every following move
-   * (the finger's translation from there), and on release. See `DraggableRoutineList`. */
-  onDragStart: () => void;
-  onDragMove: (translationY: number) => void;
-  onDragEnd: () => void;
 };
 
 /**
- * A routine on the Workout tab: its name and menu, its workout cards (or a line saying there is
- * none) and "New Workout".
+ * The selected routine on the Workout tab: its name and menu (it moves left or right among the
+ * routine chips from there), its workout cards (or a line saying there is none) and "New Workout".
  */
 export function RoutineSection({
   routine,
@@ -42,55 +38,49 @@ export function RoutineSection({
   onNewWorkout,
   onEditWorkout,
   onStartWorkout,
-  onDragStart,
-  onDragMove,
-  onDragEnd,
 }: RoutineSectionProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const workoutIds = routine.workouts.map((workout) => workout.id);
   const n = workoutIds.length;
 
-  // Holding the name starts a drag (the menu button beside it stays a plain tap); `runOnJS`
-  // because the move only ever touches plain JS state.
-  const drag = Gesture.Pan()
-    .activateAfterLongPress(400)
-    .runOnJS(true)
-    .onStart(onDragStart)
-    .onUpdate((event) => onDragMove(event.translationY))
-    .onFinalize(onDragEnd);
-
   const confirmDelete = () =>
     Alert.alert(
-      `Delete "${routine.name}"?`,
-      n === 0
-        ? 'Your history stays.'
-        : `Its ${n} ${n === 1 ? 'workout' : 'workouts'} will be deleted too. Your history stays.`,
+      t('routines.deleteTitle', { name: routine.name }),
+      n === 0 ? t('routines.historyStays') : t('routines.deleteRoutineMessage', { count: n }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteRoutine(routine.id) },
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => deleteRoutine(routine.id),
+        },
       ],
     );
 
   return (
     <Card style={styles.section}>
       <View style={styles.header}>
-        <GestureDetector gesture={drag}>
-          <View style={styles.name}>
-            <AppText variant="sectionTitle" accessibilityRole="header" numberOfLines={1}>
-              {routine.name}
-            </AppText>
-          </View>
-        </GestureDetector>
+        <AppText
+          variant="sectionTitle"
+          accessibilityRole="header"
+          numberOfLines={1}
+          style={styles.name}
+        >
+          {routine.name}
+        </AppText>
         <IconButton
           icon="more_vert"
           color={colors.iconMuted}
-          accessibilityLabel={`${routine.name} menu`}
+          accessibilityLabel={t('common.itemMenu', { name: routine.name })}
           onPress={() => setMenuOpen(true)}
         />
       </View>
       {n === 0 && (
         <AppText variant="bodySmall" tone="secondary" style={styles.empty}>
-          No workouts in this routine yet.
+          {t('routines.noWorkoutsInRoutine')}
         </AppText>
       )}
       {routine.workouts.map((workout, position) => (
@@ -107,8 +97,8 @@ export function RoutineSection({
       <Button
         variant="dashed"
         icon="add"
-        label="New Workout"
-        accessibilityLabel={`New workout in ${routine.name}`}
+        label={t('routines.newWorkout')}
+        accessibilityLabel={t('routines.newWorkoutIn', { name: routine.name })}
         fullWidth
         onPress={onNewWorkout}
       />
@@ -116,20 +106,20 @@ export function RoutineSection({
         visible={menuOpen}
         title={routine.name}
         options={[
-          { label: 'Rename', icon: 'edit', onPress: onRename },
+          { label: t('routines.rename'), icon: 'edit', onPress: onRename },
           {
-            label: 'Move up',
-            icon: 'arrow_upward',
+            label: t('common.moveLeft'),
+            icon: 'arrow_back',
             disabled: index === 0,
             onPress: () => onMove(-1),
           },
           {
-            label: 'Move down',
-            icon: 'arrow_downward',
+            label: t('common.moveRight'),
+            icon: 'arrow_forward',
             disabled: index === count - 1,
             onPress: () => onMove(1),
           },
-          { label: 'Delete', icon: 'delete', destructive: true, onPress: confirmDelete },
+          { label: t('common.delete'), icon: 'delete', destructive: true, onPress: confirmDelete },
         ]}
         onClose={() => setMenuOpen(false)}
       />
@@ -137,7 +127,7 @@ export function RoutineSection({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   section: {
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -156,4 +146,4 @@ const styles = StyleSheet.create({
   empty: {
     paddingHorizontal: spacing.sm,
   },
-});
+}));

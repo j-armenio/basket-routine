@@ -1,5 +1,6 @@
 import { ActionSheet } from '@/components/ActionSheet';
 import type { TargetMode } from '@/domain/types';
+import { useTranslation } from 'react-i18next';
 
 type TargetModeSheetProps = {
   /** The shooting drill being added; `null` keeps the sheet closed. */
@@ -10,18 +11,19 @@ type TargetModeSheetProps = {
 
 /** Asks which value a shooting drill fixes, before it is added (to a session or a template). */
 export function TargetModeSheet({ exerciseName, onPick, onClose }: TargetModeSheetProps) {
+  const { t } = useTranslation();
   return (
     <ActionSheet
       visible={exerciseName !== null}
-      title={exerciseName ? `${exerciseName}: what do you fix?` : undefined}
+      title={exerciseName ? t('workout.targetModeSheetTitle', { name: exerciseName }) : undefined}
       options={[
         {
-          label: 'Fixed attempts — log makes',
+          label: t('workout.targetModeFixedAttempts'),
           icon: 'sports_basketball',
           onPress: () => onPick('attempts'),
         },
         {
-          label: 'Fixed makes — log attempts',
+          label: t('workout.targetModeFixedMakes'),
           icon: 'check',
           onPress: () => onPick('makes'),
         },

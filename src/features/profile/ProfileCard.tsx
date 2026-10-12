@@ -2,6 +2,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { opacity, size, spacing } from '@/theme/spacing';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from './Avatar';
 import type { Profile } from './profileStorage';
@@ -14,22 +15,23 @@ type ProfileCardProps = {
 
 /** The top of the Profile tab: the photo, the name, and Edit Profile. */
 export function ProfileCard({ profile, onEdit }: ProfileCardProps) {
+  const { t } = useTranslation();
   return (
     <Card style={styles.card}>
       <View style={styles.identity}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Change profile photo"
+          accessibilityLabel={t('profile.changeProfilePhoto')}
           onPress={onEdit}
           style={({ pressed }) => pressed && styles.pressed}
         >
           <Avatar name={profile.name} photoUri={profile.photoUri} size={size.avatar} />
         </Pressable>
         <AppText variant="headline" numberOfLines={1} style={styles.name}>
-          {displayName(profile.name)}
+          {displayName(t, profile.name)}
         </AppText>
       </View>
-      <Button variant="bordered" icon="edit" label="Edit Profile" onPress={onEdit} />
+      <Button variant="bordered" icon="edit" label={t('profile.editProfile')} onPress={onEdit} />
     </Card>
   );
 }

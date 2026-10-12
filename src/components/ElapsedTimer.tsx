@@ -1,9 +1,10 @@
 import { formatElapsed } from '@/domain/format';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { size, spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -24,6 +25,8 @@ export function useElapsed(start: Date): number {
  * right after the screen or the app was away.
  */
 export function ElapsedTimer({ start }: { start: Date }) {
+  const styles = useStyles();
+  const colors = useColors();
   const text = formatElapsed(useElapsed(start));
   return (
     <View
@@ -40,7 +43,7 @@ export function ElapsedTimer({ start }: { start: Date }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   pill: {
     height: size.pill,
     flexDirection: 'row',
@@ -55,4 +58,4 @@ const styles = StyleSheet.create({
     ...tabularNums,
     color: colors.onSecondary,
   },
-});
+}));

@@ -1,7 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, opacity, size } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { Pressable, StyleSheet, View, type ColorValue, type PressableProps } from 'react-native';
+import { Pressable, View, type ColorValue, type PressableProps } from 'react-native';
 import { Icon } from './Icon';
 
 type IconButtonProps = Omit<PressableProps, 'children' | 'style' | 'accessibilityLabel'> & {
@@ -22,11 +23,14 @@ type IconButtonProps = Omit<PressableProps, 'children' | 'style' | 'accessibilit
 export function IconButton({
   icon,
   accessibilityLabel,
-  color = colors.textPrimary,
+  color: colorProp,
   variant = 'plain',
   disabled,
   ...props
 }: IconButtonProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const color = colorProp ?? colors.textPrimary;
   const play = variant === 'play';
   return (
     <Pressable
@@ -57,7 +61,7 @@ export function IconButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   base: {
     width: size.iconButton,
     height: size.iconButton,
@@ -88,4 +92,4 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: opacity.disabled,
   },
-});
+}));

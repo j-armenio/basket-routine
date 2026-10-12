@@ -1,21 +1,26 @@
 import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
-import { formatDuration, formatWorkoutDate } from '@/domain/format';
-import { reasonMessage } from '@/domain/messages';
+import { formatWorkoutDate } from '@/domain/format';
 import { summarizeSession } from '@/domain/summary';
 import { deleteSession } from '@/features/history/actions';
 import { useFinishedSession } from '@/features/history/hooks';
 import { SessionExerciseView } from '@/features/history/SessionExerciseView';
 import { SessionTotals } from '@/features/history/SessionTotals';
+import { useLanguage } from '@/features/settings/hooks';
 import { leaveScreen } from '@/features/workout/navigation';
-import { colors } from '@/theme/colors';
+import { formatDuration } from '@/i18n/format';
+import { useColors } from '@/theme/ThemeContext';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 
 /** A finished session, read-only: the totals and every exercise as they were stored at Finish. */
 export default function SessionDetailScreen() {
+  const colors = useColors();
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const session = useFinishedSession(Number(id));
@@ -23,24 +28,28 @@ export default function SessionDetailScreen() {
   // renders nothing, so "not found" doesn't flash on the way out.
   const [mountedWithSession] = useState(session !== undefined);
   const back = (
-    <IconButton icon="arrow_back" accessibilityLabel="Back" onPress={() => leaveScreen(router)} />
+    <IconButton
+      icon="arrow_back"
+      accessibilityLabel={t('common.back')}
+      onPress={() => leaveScreen(router)}
+    />
   );
 
   if (!session) {
     if (mountedWithSession) return null;
     return (
-      <Screen title="Workout" titleVariant="titleLarge" left={back} bottomInset>
+      <Screen title={t('history.workout')} titleVariant="titleLarge" left={back} bottomInset>
         <EmptyState
           icon="history"
-          title="Workout not found"
-          message="This workout doesn't exist or isn't finished."
-          action={{ label: 'Back to Profile', onPress: () => router.dismissTo('/profile') }}
+          title={t('history.workoutNotFoundTitle')}
+          message={t('history.workoutNotFoundMessage')}
+          action={{ label: t('common.backToProfile'), onPress: () => router.dismissTo('/profile') }}
         />
       </Screen>
     );
   }
 
-  const date = formatWorkoutDate(session.startedAt);
+  const date = formatWorkoutDate(session.startedAt, locale);
   const duration = session.finishedAt
     ? session.finishedAt.getTime() - session.startedAt.getTime()
     : 0;
@@ -48,16 +57,16 @@ export default function SessionDetailScreen() {
   const remove = () => {
     const result = deleteSession(session.id);
     if (result.ok) leaveScreen(router);
-    else Alert.alert("Couldn't delete workout", reasonMessage(result.reason));
+    else Alert.alert(t('history.deleteFailedTitle'), t(`errors.${result.reason}`));
   };
 
   const confirmDelete = () =>
     Alert.alert(
-      'Delete workout?',
-      `${session.name} from ${date} will be removed from your history. This can't be undone.`,
+      t('history.deleteSessionTitle'),
+      t('history.deleteSessionMessage', { name: session.name, date }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: remove },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: remove },
       ],
     );
 
@@ -65,13 +74,13 @@ export default function SessionDetailScreen() {
     <Screen
       title={session.name}
       titleVariant="titleLarge"
-      subtitle={`${date} · ${formatDuration(duration)}`}
+      subtitle={`${date} · ${formatDuration(t, duration)}`}
       left={back}
       right={
         <IconButton
           icon="delete"
           color={colors.iconMuted}
-          accessibilityLabel="Delete workout"
+          accessibilityLabel={t('history.deleteWorkout')}
           onPress={confirmDelete}
         />
       }

@@ -1,14 +1,7 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { opacity, radius, spacing } from '@/theme/spacing';
 import type { ReactNode } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  type PressableProps,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { Pressable, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 type CardProps = {
   children: ReactNode;
@@ -31,6 +24,7 @@ export function Card({
   variant = 'default',
   style,
 }: CardProps) {
+  const styles = useStyles();
   const cardStyle = [styles.card, styles[variant], style];
   if (!onPress) {
     return (
@@ -52,7 +46,7 @@ export function Card({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     gap: spacing.md,
     borderRadius: radius.card,
@@ -72,4 +66,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: opacity.pressed,
   },
-});
+}));

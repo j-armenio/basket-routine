@@ -3,10 +3,12 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import type { RoutineWithWorkouts } from '@/db/repositories/routines';
-import { formatExerciseList } from '@/domain/format';
-import { colors } from '@/theme/colors';
+import { formatExerciseList } from '@/i18n/format';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { opacity, radius, size, spacing } from '@/theme/spacing';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, View } from 'react-native';
 
 type RoutineChoiceSectionProps = {
   routine: RoutineWithWorkouts;
@@ -23,6 +25,9 @@ export function RoutineChoiceSection({
   onPickWorkout,
   onNewWorkout,
 }: RoutineChoiceSectionProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   return (
     <Card style={styles.section}>
       <AppText
@@ -35,14 +40,14 @@ export function RoutineChoiceSection({
       </AppText>
       {routine.workouts.length === 0 && (
         <AppText variant="bodySmall" tone="secondary" style={styles.name}>
-          No workouts in this routine yet.
+          {t('routines.noWorkoutsInRoutine')}
         </AppText>
       )}
       {routine.workouts.map((workout) => (
         <Pressable
           key={workout.id}
           accessibilityRole="button"
-          accessibilityLabel={`Add to ${workout.name}`}
+          accessibilityLabel={t('routines.addToWorkout', { name: workout.name })}
           onPress={() => onPickWorkout(workout.id)}
           style={({ pressed }) => [styles.workout, pressed && styles.pressed]}
         >
@@ -51,7 +56,10 @@ export function RoutineChoiceSection({
               {workout.name}
             </AppText>
             <AppText variant="subtitle" tone="secondary" numberOfLines={2}>
-              {formatExerciseList(workout.exercises.map((item) => item.exercise.name))}
+              {formatExerciseList(
+                t,
+                workout.exercises.map((item) => item.exercise.name),
+              )}
             </AppText>
           </View>
           <Icon name="add" size={size.icon} color={colors.primary} />
@@ -60,8 +68,8 @@ export function RoutineChoiceSection({
       <Button
         variant="dashed"
         icon="add"
-        label="New Workout"
-        accessibilityLabel={`New workout in ${routine.name}`}
+        label={t('routines.newWorkout')}
+        accessibilityLabel={t('routines.newWorkoutIn', { name: routine.name })}
         fullWidth
         onPress={onNewWorkout}
       />
@@ -69,7 +77,7 @@ export function RoutineChoiceSection({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   section: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
@@ -97,4 +105,4 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xs,
   },
-});
+}));

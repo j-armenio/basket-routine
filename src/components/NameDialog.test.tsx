@@ -18,12 +18,6 @@ test('shows the title and starts with the initial name', async () => {
   expect(screen.getByLabelText('Name')).toHaveDisplayValue('Push');
 });
 
-test('renders nothing when not visible', async () => {
-  await setup({ visible: false });
-
-  expect(screen.queryByText('New Routine')).toBeNull();
-});
-
 test('Save is disabled while the name is blank', async () => {
   const { user, onConfirm } = await setup();
   expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();

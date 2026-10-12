@@ -3,7 +3,7 @@ import { getInProgressSession, getSessionDetail } from '@/db/repositories/sessio
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import type { Db } from '@/db/types';
 import { notifyDataChanged } from '@/features/dataStore';
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { act, cleanup, fireEvent, screen, userEvent, within } from '@testing-library/react-native';
 import { AndroidHaptics, performAndroidHapticsAsync } from 'expo-haptics';
 import { renderRouter } from 'expo-router/testing-library';
@@ -288,7 +288,9 @@ test('minimize shows the banner on every tab, and it survives an app kill', asyn
 
   expect(first.getPathname()).toBe('/');
   expect(screen.getByText('Workout in progress')).toBeOnTheScreen();
-  expect(screen.getByRole('button', { name: 'Resume Workout' })).toBeOnTheScreen();
+  // the banner resumes it; the Start Empty Workout button is hidden meanwhile
+  expect(screen.getByRole('button', { name: /^Resume / })).toBeOnTheScreen();
+  expect(screen.queryByRole('button', { name: 'Start Empty Workout' })).toBeNull();
   expectAccessibleControls();
   for (const tab of ['Exercises', 'Profile', 'Workout']) {
     await user.press(screen.getByRole('tab', { name: tab }));
@@ -302,7 +304,7 @@ test('minimize shows the banner on every tab, and it survives an app kill', asyn
   expect(second.getPathname()).toBe('/');
   expect(screen.getByText('Workout in progress')).toBeOnTheScreen();
 
-  await user.press(screen.getByRole('button', { name: 'Resume Workout' }));
+  await user.press(screen.getByRole('button', { name: /^Resume / }));
 
   expect(second.getPathname()).toBe('/active-workout');
   expect(screen.getByLabelText('Set 1 makes')).toHaveDisplayValue('7');

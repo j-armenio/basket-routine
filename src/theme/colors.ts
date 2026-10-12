@@ -1,5 +1,6 @@
-// The color tokens of design-handoff/tokens.json, by the same names. Dark theme only.
-export const colors = {
+// The color tokens, by role (docs/design.md). Two palettes with the same tokens: dark (the default)
+// and light. Screens never import a palette: they read it through `useColors()` / `makeStyles`.
+export const darkColors = {
   /** Screen background. */
   background: '#1E1E24',
   /** The tab bar and the fixed bottom action bars. */
@@ -46,8 +47,13 @@ export const colors = {
   courtArc: '#2D5B44',
   /** The court's lines. */
   courtLine: '#A8D5BA',
-  /** Under every mark on the board, so it stands out from the lines. X marks and arrows use
-   *  `textPrimary`, pen strokes `primary`. */
+  /** X marks and arrows on the board. */
+  boardMark: '#F5F6F8',
+  /** Behind a mark's outline on the board. */
+  boardMarkOutline: '#121215',
+  /** Pen strokes on the board. */
+  boardPen: '#F47C98',
+  /** Under every mark on the board, so it stands out from the lines. */
   boardHalo: 'rgba(16, 36, 26, 0.85)',
   /** Behind the thumbnail's expand icon. */
   boardBadge: 'rgba(18, 18, 21, 0.7)',
@@ -55,4 +61,33 @@ export const colors = {
   scrim: 'rgba(0, 0, 0, 0.6)',
 };
 
-export type ColorToken = keyof typeof colors;
+export type ColorToken = keyof typeof darkColors;
+export type Palette = Record<ColorToken, string>;
+
+/** The light palette. The tactical board is a picture, not an app surface: its tokens (`court*`,
+ *  `board*`) keep the dark values. */
+export const lightColors: Palette = {
+  ...darkColors,
+  background: '#F5F6F8',
+  backgroundDeep: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceRaised: '#EEF0F3',
+  divider: '#E2E4E9',
+  outline: '#D3D6DD',
+  outlineStrong: '#868995',
+  textPrimary: '#1E1E24',
+  textSecondary: '#5A5D69',
+  iconMuted: '#50535E',
+  iconPlaceholder: '#8A8C96',
+  primary: '#C2335A',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#FDEEF2',
+  secondary: '#D2EADC',
+  onSecondary: '#14331F',
+  secondaryOutline: '#3F7A5A',
+  secondaryText: '#2A6646',
+  success: '#1B7342',
+  error: '#B83A2A',
+  neutralStat: '#5A5D69',
+  scrim: 'rgba(0, 0, 0, 0.4)',
+};

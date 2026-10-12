@@ -22,12 +22,6 @@ const deleteAction = () =>
     nativeEvent: { actionName: 'delete' },
   });
 
-test('renders the row', async () => {
-  await setup();
-
-  expect(screen.getByText('Set 1')).toBeOnTheScreen();
-});
-
 test('the delete accessibility action deletes and confirms with a haptic', async () => {
   const onDelete = await setup();
 

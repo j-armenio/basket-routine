@@ -41,8 +41,8 @@ From `PLAN.md`'s former backlog section and the phases' out-of-scope lists.
 - Shot-zone tracking (court map), shot-type tags (free throws, 3PT).
 - Fine-grained "update template" (a diff instead of the full overwrite).
 - Drag & drop reordering for what still only has Move up / Move down: the workouts inside a
-  routine (`WorkoutCard`'s menu). Routines themselves (`DraggableRoutineList`) and a template's
-  exercises (`DraggableExerciseList`) already drag since Phase 9.
+  routine (`WorkoutCard`'s menu). A template's exercises (`DraggableExerciseList`) already drag since Phase 9;
+  routines (chips since Phase 9.6) move only through their menu's Move left / Move right.
 - **JSON export / import backup**, asked for 2026-09-30 after Phase 9's Profile/Settings work: a
   real APK with months of history is now on the phone, Android Auto Backup (`PLAN.md`'s accepted
   risk) is a best-effort fallback at most — its default 25 MB quota and its own schedule (wifi,

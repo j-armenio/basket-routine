@@ -1,19 +1,21 @@
-import { colors } from '@/theme/colors';
+import type { ColorToken } from '@/theme/colors';
+import { useColors } from '@/theme/ThemeContext';
 import { fonts, type FontWeight } from '@/theme/fonts';
 import { typography, type TypographyVariant } from '@/theme/typography';
 import { Text, type TextProps } from 'react-native';
 
-const tones = {
-  default: colors.textPrimary,
-  secondary: colors.textSecondary,
-  primary: colors.primary,
-  green: colors.secondaryText,
-  error: colors.error,
-  success: colors.success,
-  neutral: colors.neutralStat,
-};
+// Each tone is a color token, so the text follows the palette in use.
+const toneTokens = {
+  default: 'textPrimary',
+  secondary: 'textSecondary',
+  primary: 'primary',
+  green: 'secondaryText',
+  error: 'error',
+  success: 'success',
+  neutral: 'neutralStat',
+} satisfies Record<string, ColorToken>;
 
-export type TextTone = keyof typeof tones;
+export type TextTone = keyof typeof toneTokens;
 
 type AppTextProps = TextProps & {
   variant?: TypographyVariant;
@@ -29,11 +31,12 @@ export function AppText({
   style,
   ...props
 }: AppTextProps) {
+  const colors = useColors();
   return (
     <Text
       style={[
         typography[variant],
-        { color: tones[tone] },
+        { color: colors[toneTokens[tone]] },
         weight && { fontFamily: fonts[weight] },
         style,
       ]}

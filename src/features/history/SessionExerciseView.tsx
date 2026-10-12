@@ -5,10 +5,12 @@ import { fgBand, setFgPct } from '@/domain/fg';
 import { formatFgPct } from '@/domain/format';
 import { summarizeExercise } from '@/domain/summary';
 import { Icon } from '@/components/Icon';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { size, spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
-import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 import { TacticalBoardSlot } from '../tacticalBoard/TacticalBoardSlot';
 import type { SessionExerciseDetail, SessionSetDetail } from '../workout/hooks';
 import { SetNumber } from '../workout/SetNumber';
@@ -23,6 +25,8 @@ const EMPTY = '—';
  * editable.
  */
 export function SessionExerciseView({ exercise }: { exercise: SessionExerciseDetail }) {
+  const styles = useStyles();
+  const { t } = useTranslation();
   const { targetMode } = exercise;
   const summary = summarizeExercise(exercise);
 
@@ -31,7 +35,7 @@ export function SessionExerciseView({ exercise }: { exercise: SessionExerciseDet
       <View style={styles.titles}>
         <AppText variant="cardTitle">{exercise.name}</AppText>
         <AppText variant="caption" tone="secondary">
-          {modeSubtitle(targetMode)}
+          {modeSubtitle(t, targetMode)}
         </AppText>
       </View>
       <TacticalBoardSlot board={exercise.tacticalBoard} exerciseName={exercise.name} />
@@ -47,12 +51,14 @@ export function SessionExerciseView({ exercise }: { exercise: SessionExerciseDet
       </View>
       {summary.trackingType === 'makes_attempts' && summary.attempts > 0 && (
         <AppText variant="bodySmall" tone="secondary">
-          Total: {summary.makes} makes / {summary.attempts} attempts ·{' '}
+          {t('workout.totalLabel', { makes: summary.makes, attempts: summary.attempts })} ·{' '}
           <AppText tone={fgTone(fgBand(summary.fgPct))}>{formatFgPct(summary.fgPct)}</AppText>
         </AppText>
       )}
       {exercise.note !== '' && (
-        <AppText accessibilityLabel={`${exercise.name} note`}>{exercise.note}</AppText>
+        <AppText accessibilityLabel={t('workout.noteLabel', { name: exercise.name })}>
+          {exercise.note}
+        </AppText>
       )}
     </Card>
   );
@@ -67,6 +73,7 @@ function ShootingRow({
   number: number;
   targetMode: 'attempts' | 'makes';
 }) {
+  const { t } = useTranslation();
   const roles = columnRoles(targetMode);
   const fg =
     set.targetValue === null
@@ -79,12 +86,20 @@ function ShootingRow({
     <View style={setTable.row}>
       <SetNumber number={number} />
       <View style={setTable.valueColumn}>
-        <AppText weight="bold" style={tabularNums} accessibilityLabel={`Set ${number} makes`}>
+        <AppText
+          weight="bold"
+          style={tabularNums}
+          accessibilityLabel={t('workout.setMakesLabel', { number })}
+        >
           {value(roles.makes)}
         </AppText>
       </View>
       <View style={setTable.valueColumn}>
-        <AppText weight="bold" style={tabularNums} accessibilityLabel={`Set ${number} attempts`}>
+        <AppText
+          weight="bold"
+          style={tabularNums}
+          accessibilityLabel={t('workout.setAttemptsLabel', { number })}
+        >
           {value(roles.attempts)}
         </AppText>
       </View>
@@ -94,7 +109,7 @@ function ShootingRow({
           weight="bold"
           tone={fgTone(fgBand(fg))}
           style={tabularNums}
-          accessibilityLabel={`Set ${number} FG%`}
+          accessibilityLabel={t('workout.setFgLabel', { number })}
         >
           {formatFgPct(fg)}
         </AppText>
@@ -104,6 +119,8 @@ function ShootingRow({
 }
 
 function CheckRow({ set, number }: { set: SessionSetDetail; number: number }) {
+  const colors = useColors();
+  const { t } = useTranslation();
   return (
     <View style={setTable.row}>
       <SetNumber number={number} />
@@ -111,7 +128,9 @@ function CheckRow({ set, number }: { set: SessionSetDetail; number: number }) {
         style={setTable.doneColumn}
         accessible
         accessibilityRole="text"
-        accessibilityLabel={`Set ${number} ${set.completed ? 'done' : 'not done'}`}
+        accessibilityLabel={t(set.completed ? 'workout.setDoneLabel' : 'workout.setNotDoneLabel', {
+          number,
+        })}
       >
         {set.completed ? (
           <Icon name="check" size={size.iconLarge} color={colors.success} />
@@ -123,11 +142,11 @@ function CheckRow({ set, number }: { set: SessionSetDetail; number: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   titles: {
     gap: spacing.xxs,
   },
   table: {
     gap: spacing.sm,
   },
-});
+}));

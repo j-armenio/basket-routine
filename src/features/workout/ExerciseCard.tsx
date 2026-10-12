@@ -7,11 +7,13 @@ import { IconButton } from '@/components/IconButton';
 import { fgBand } from '@/domain/fg';
 import { formatFgPct } from '@/domain/format';
 import { summarizeExercise } from '@/domain/summary';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, View } from 'react-native';
 import { TacticalBoardSlot } from '../tacticalBoard/TacticalBoardSlot';
 import { addSet, removeExercise, setBoard } from './actions';
 import { CheckSetRow } from './CheckSetRow';
@@ -28,21 +30,40 @@ type ExerciseCardProps = {
 };
 
 export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const { targetMode } = exercise;
   const summary = summarizeExercise(exercise);
 
   const confirmRemove = () =>
-    Alert.alert('Remove exercise?', `${exercise.name} and its sets will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => removeExercise(exercise.id) },
-    ]);
+    Alert.alert(
+      t('workout.removeExerciseTitle'),
+      t('workout.removeExerciseMessage', { name: exercise.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.remove'),
+          style: 'destructive',
+          onPress: () => removeExercise(exercise.id),
+        },
+      ],
+    );
   const confirmRemoveBoard = () =>
-    Alert.alert('Remove tactical board?', `The drawing on ${exercise.name} will be deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => setBoard(exercise.id, null) },
-    ]);
+    Alert.alert(
+      t('workout.removeBoardTitle'),
+      t('workout.removeBoardMessage', { name: exercise.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.remove'),
+          style: 'destructive',
+          onPress: () => setBoard(exercise.id, null),
+        },
+      ],
+    );
 
   return (
     <Card variant="compact" style={styles.card}>
@@ -50,21 +71,21 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
         <View style={styles.titles}>
           <AppText variant="cardTitle">{exercise.name}</AppText>
           <AppText variant="caption" tone="secondary">
-            {modeSubtitle(targetMode)}
+            {modeSubtitle(t, targetMode)}
           </AppText>
         </View>
         {!exercise.tacticalBoard && (
           <IconButton
             color={colors.iconMuted}
             icon="assignment_add"
-            accessibilityLabel={`Add tactical board for ${exercise.name}`}
+            accessibilityLabel={t('workout.addBoardFor', { name: exercise.name })}
             onPress={() => router.push(`/tactical-board?sessionExerciseId=${exercise.id}`)}
           />
         )}
         <IconButton
           color={colors.iconMuted}
           icon="more_vert"
-          accessibilityLabel={`${exercise.name} menu`}
+          accessibilityLabel={t('common.itemMenu', { name: exercise.name })}
           onPress={() => setMenuOpen(true)}
         />
       </View>
@@ -96,7 +117,7 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
       </View>
       {summary.trackingType === 'makes_attempts' && summary.attempts > 0 && (
         <AppText variant="bodySmall" tone="secondary" style={styles.total}>
-          Total: {summary.makes} makes / {summary.attempts} attempts ·{' '}
+          {t('workout.totalLabel', { makes: summary.makes, attempts: summary.attempts })} ·{' '}
           <AppText variant="bodySmall" weight="bold" tone={fgTone(fgBand(summary.fgPct))}>
             {formatFgPct(summary.fgPct)}
           </AppText>
@@ -105,7 +126,7 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
       <Button
         variant="ghost"
         icon="add"
-        label="Add Set"
+        label={t('workout.addSet')}
         fullWidth
         onPress={() => addSet(exercise.id)}
       />
@@ -115,13 +136,13 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
         title={exercise.name}
         options={[
           {
-            label: 'Move up',
+            label: t('common.moveUp'),
             icon: 'arrow_upward',
             disabled: index === 0,
             onPress: () => onMove(-1),
           },
           {
-            label: 'Move down',
+            label: t('common.moveDown'),
             icon: 'arrow_downward',
             disabled: index === count - 1,
             onPress: () => onMove(1),
@@ -129,14 +150,19 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
           ...(exercise.tacticalBoard
             ? [
                 {
-                  label: 'Remove tactical board',
+                  label: t('workout.removeTacticalBoard'),
                   icon: 'layers_clear' as const,
                   destructive: true,
                   onPress: confirmRemoveBoard,
                 },
               ]
             : []),
-          { label: 'Remove exercise', icon: 'delete', destructive: true, onPress: confirmRemove },
+          {
+            label: t('workout.removeExercise'),
+            icon: 'delete',
+            destructive: true,
+            onPress: confirmRemove,
+          },
         ]}
         onClose={() => setMenuOpen(false)}
       />
@@ -144,7 +170,7 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   // The ⋮ button's own padding lines its icon up with the table's right edge.
   card: {
     paddingRight: spacing.md,
@@ -166,4 +192,4 @@ const styles = StyleSheet.create({
   total: {
     paddingTop: spacing.xs,
   },
-});
+}));

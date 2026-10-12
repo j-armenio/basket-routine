@@ -1,5 +1,6 @@
 import { Icon } from '@/components/Icon';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { size } from '@/theme/spacing';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
@@ -36,6 +37,7 @@ export function MediaView({
   controls = false,
   iconSize = size.iconLarge,
 }: MediaViewProps) {
+  const styles = useStyles();
   const [failed, setFailed] = useState<MediaSource['source'] | null>(null);
   if (!media || failed === media.source)
     return <MediaPlaceholder style={style} iconSize={iconSize} />;
@@ -69,6 +71,8 @@ export function MediaPlaceholder({
   style: StyleProp<ImageStyle>;
   iconSize?: number;
 }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View
       testID="media-placeholder"
@@ -91,6 +95,8 @@ function VideoStill({
   fit: Fit;
   iconSize: number;
 }) {
+  const styles = useStyles();
+  const colors = useColors();
   const thumbnail = useVideoThumbnail(source);
   const badge = Math.round(iconSize * 0.75);
   // No first frame could be made: a paused player shows it instead (heavier, so only as a fallback).
@@ -125,6 +131,7 @@ function VideoPlayback({
   /** Loaded but not played: shows the first frame. */
   paused?: boolean;
 }) {
+  const styles = useStyles();
   const player = useVideoPlayer(source, (created) => {
     created.loop = true;
     created.muted = true;
@@ -142,7 +149,7 @@ function VideoPlayback({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   box: {
     overflow: 'hidden',
     backgroundColor: colors.surface,
@@ -154,4 +161,4 @@ const styles = StyleSheet.create({
   badge: {
     backgroundColor: colors.background,
   },
-});
+}));

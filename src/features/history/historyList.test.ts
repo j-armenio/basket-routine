@@ -1,4 +1,5 @@
 import type { SessionSummary } from '@/domain/summary';
+import i18n from '@/i18n/i18n';
 import {
   chartDateLabels,
   chartRangeCount,
@@ -33,6 +34,9 @@ const item = (id: number, startedAt: Date): HistoryItem => ({
   exerciseNames: [],
   summary: summary({ makes: 0, attempts: 0 }, { completed: 0, total: 0 }),
 });
+
+const { t } = i18n;
+const locale = 'en-US';
 
 describe('toHistoryItem', () => {
   const started = new Date(2026, 8, 24, 10, 0);
@@ -88,7 +92,9 @@ describe('toHistoryItem', () => {
 
 describe('sessionResult', () => {
   test('shooting only', () => {
-    expect(sessionResult(summary({ makes: 7, attempts: 10 }, { completed: 0, total: 0 }))).toEqual({
+    expect(
+      sessionResult(t, summary({ makes: 7, attempts: 10 }, { completed: 0, total: 0 })),
+    ).toEqual({
       fgPct: '70%',
       fgBand: 'good',
       checks: null,
@@ -96,7 +102,9 @@ describe('sessionResult', () => {
   });
 
   test('check only', () => {
-    expect(sessionResult(summary({ makes: 0, attempts: 0 }, { completed: 1, total: 3 }))).toEqual({
+    expect(
+      sessionResult(t, summary({ makes: 0, attempts: 0 }, { completed: 1, total: 3 })),
+    ).toEqual({
       fgPct: null,
       fgBand: 'none',
       checks: '1 / 3 done',
@@ -104,7 +112,9 @@ describe('sessionResult', () => {
   });
 
   test('mixed shows both', () => {
-    expect(sessionResult(summary({ makes: 2, attempts: 3 }, { completed: 2, total: 2 }))).toEqual({
+    expect(
+      sessionResult(t, summary({ makes: 2, attempts: 3 }, { completed: 2, total: 2 })),
+    ).toEqual({
       fgPct: '66.7%',
       fgBand: 'good',
       checks: '2 / 2 done',
@@ -113,18 +123,20 @@ describe('sessionResult', () => {
 
   test('a shooting session with a logged 0 makes still shows 0%, as poor', () => {
     expect(
-      sessionResult(summary({ makes: 0, attempts: 5 }, { completed: 0, total: 0 })),
+      sessionResult(t, summary({ makes: 0, attempts: 5 }, { completed: 0, total: 0 })),
     ).toMatchObject({ fgPct: '0%', fgBand: 'poor' });
   });
 
   test('the band of a middle value is neutral', () => {
     expect(
-      sessionResult(summary({ makes: 1, attempts: 2 }, { completed: 0, total: 0 })),
+      sessionResult(t, summary({ makes: 1, attempts: 2 }, { completed: 0, total: 0 })),
     ).toMatchObject({ fgPct: '50%', fgBand: 'neutral' });
   });
 
   test('neither: both are null', () => {
-    expect(sessionResult(summary({ makes: 0, attempts: 0 }, { completed: 0, total: 0 }))).toEqual({
+    expect(
+      sessionResult(t, summary({ makes: 0, attempts: 0 }, { completed: 0, total: 0 })),
+    ).toEqual({
       fgPct: null,
       fgBand: 'none',
       checks: null,
@@ -168,11 +180,14 @@ describe('profileStats', () => {
 
 describe('groupByMonth', () => {
   test('groups by month in list order', () => {
-    const sections = groupByMonth([
-      item(1, new Date(2026, 8, 24)),
-      item(2, new Date(2026, 8, 3)),
-      item(3, new Date(2026, 7, 20)),
-    ]);
+    const sections = groupByMonth(
+      [
+        item(1, new Date(2026, 8, 24)),
+        item(2, new Date(2026, 8, 3)),
+        item(3, new Date(2026, 7, 20)),
+      ],
+      locale,
+    );
 
     expect(sections.map((s) => [s.title, s.data.map((i) => i.id)])).toEqual([
       ['September 2026', [1, 2]],
@@ -181,13 +196,16 @@ describe('groupByMonth', () => {
   });
 
   test('the same month in two years makes two sections', () => {
-    const sections = groupByMonth([item(1, new Date(2027, 8, 10)), item(2, new Date(2026, 8, 10))]);
+    const sections = groupByMonth(
+      [item(1, new Date(2027, 8, 10)), item(2, new Date(2026, 8, 10))],
+      locale,
+    );
 
     expect(sections.map((s) => s.title)).toEqual(['September 2027', 'September 2026']);
   });
 
   test('no items, no sections', () => {
-    expect(groupByMonth([])).toEqual([]);
+    expect(groupByMonth([], locale)).toEqual([]);
   });
 });
 
@@ -229,7 +247,7 @@ describe('fgEvolution', () => {
       5,
     );
 
-    expect(chartDateLabels(points)).toEqual([
+    expect(chartDateLabels(points, locale)).toEqual([
       { label: 'Sep 25', first: 0, last: 2 },
       { label: 'Sep 28', first: 3, last: 3 },
     ]);
@@ -238,13 +256,13 @@ describe('fgEvolution', () => {
   test('the screen reader label lists every point', () => {
     const points = fgEvolution([shot(2, 28, 1, 3), shot(1, 25, 7, 10)], 5);
 
-    expect(fgEvolutionLabel(points)).toBe(
+    expect(fgEvolutionLabel(t, locale, points)).toBe(
       'FG% over the last 2 workouts: Sep 25 Workout 1 70%, Sep 28 Workout 2 33.3%',
     );
-    expect(fgEvolutionLabel(points.slice(1))).toBe(
+    expect(fgEvolutionLabel(t, locale, points.slice(1))).toBe(
       'FG% over the last workout: Sep 28 Workout 2 33.3%',
     );
-    expect(fgEvolutionLabel(points, true)).toBe(
+    expect(fgEvolutionLabel(t, locale, points, true)).toBe(
       'FG% over all 2 workouts: Sep 25 Workout 1 70%, Sep 28 Workout 2 33.3%',
     );
   });
@@ -266,10 +284,10 @@ describe('fgEvolution', () => {
     });
     const points = fgEvolution(items, chartRangeCount('all'));
 
-    expect(fgEvolutionLabel(points, true)).toBe(
+    expect(fgEvolutionLabel(t, locale, points, true)).toBe(
       'FG% over all 12 workouts, from Sep 1 to Sep 12: first 25%, best 90%, latest 50%',
     );
-    expect(fgEvolutionLabel(points.slice(1))).toBe(
+    expect(fgEvolutionLabel(t, locale, points.slice(1))).toBe(
       'FG% over the last 11 workouts, from Sep 2 to Sep 12: first 25%, best 90%, latest 50%',
     );
   });
@@ -277,10 +295,10 @@ describe('fgEvolution', () => {
 
 describe('the chart range', () => {
   test('5, 10, 20 or all, with the menu and button texts', () => {
-    expect(chartRangeLabel(5)).toBe('Last 5 workouts');
-    expect(chartRangeLabel('all')).toBe('All workouts');
-    expect(chartRangeShortLabel(20)).toBe('Last 20');
-    expect(chartRangeShortLabel('all')).toBe('All');
+    expect(chartRangeLabel(t, 5)).toBe('Last 5 workouts');
+    expect(chartRangeLabel(t, 'all')).toBe('All workouts');
+    expect(chartRangeShortLabel(t, 20)).toBe('Last 20');
+    expect(chartRangeShortLabel(t, 'all')).toBe('All');
     expect(chartRangeCount(10)).toBe(10);
     expect(chartRangeCount('all')).toBe(Infinity);
   });

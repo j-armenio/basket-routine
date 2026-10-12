@@ -3,11 +3,13 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { IconButton } from '@/components/IconButton';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { TacticalBoardSlot } from '../tacticalBoard/TacticalBoardSlot';
 import { SetTableHeader, modeSubtitle } from '../workout/SetTableHeader';
@@ -41,6 +43,9 @@ export function TemplateExerciseCard({
   onDragMove,
   onDragEnd,
 }: TemplateExerciseCardProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -54,23 +59,31 @@ export function TemplateExerciseCard({
     .onFinalize(onDragEnd);
 
   const confirmRemove = () =>
-    Alert.alert('Remove exercise?', `${exercise.name} and its sets will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: () => updateDraft((draft) => removeExercise(draft, exercise.key)),
-      },
-    ]);
+    Alert.alert(
+      t('workout.removeExerciseTitle'),
+      t('workout.removeExerciseMessage', { name: exercise.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.remove'),
+          style: 'destructive',
+          onPress: () => updateDraft((draft) => removeExercise(draft, exercise.key)),
+        },
+      ],
+    );
   const confirmRemoveBoard = () =>
-    Alert.alert('Remove tactical board?', `The drawing on ${exercise.name} will be deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: () => updateDraft((draft) => setBoard(draft, exercise.key, null)),
-      },
-    ]);
+    Alert.alert(
+      t('workout.removeBoardTitle'),
+      t('workout.removeBoardMessage', { name: exercise.name }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.remove'),
+          style: 'destructive',
+          onPress: () => updateDraft((draft) => setBoard(draft, exercise.key, null)),
+        },
+      ],
+    );
   const move = (delta: -1 | 1) => updateDraft((draft) => moveExercise(draft, exercise.key, delta));
 
   return (
@@ -80,7 +93,7 @@ export function TemplateExerciseCard({
           <View style={styles.titles}>
             <AppText variant="cardTitle">{exercise.name}</AppText>
             <AppText variant="caption" tone="secondary">
-              {modeSubtitle(exercise.targetMode)}
+              {modeSubtitle(t, exercise.targetMode)}
             </AppText>
           </View>
         </GestureDetector>
@@ -95,14 +108,14 @@ export function TemplateExerciseCard({
           <IconButton
             color={colors.iconMuted}
             icon="assignment_add"
-            accessibilityLabel={`Add tactical board for ${exercise.name}`}
+            accessibilityLabel={t('workout.addBoardFor', { name: exercise.name })}
             onPress={() => router.push(`/tactical-board?draftKey=${exercise.key}`)}
           />
         )}
         <IconButton
           color={colors.iconMuted}
           icon="more_vert"
-          accessibilityLabel={`${exercise.name} menu`}
+          accessibilityLabel={t('common.itemMenu', { name: exercise.name })}
           onPress={() => setMenuOpen(true)}
         />
       </View>
@@ -122,7 +135,7 @@ export function TemplateExerciseCard({
       <Button
         variant="ghost"
         icon="add"
-        label="Add Set"
+        label={t('workout.addSet')}
         fullWidth
         onPress={() => updateDraft((draft) => addSet(draft, exercise.key))}
       />
@@ -131,13 +144,13 @@ export function TemplateExerciseCard({
         title={exercise.name}
         options={[
           {
-            label: 'Move up',
+            label: t('common.moveUp'),
             icon: 'arrow_upward',
             disabled: index === 0,
             onPress: () => move(-1),
           },
           {
-            label: 'Move down',
+            label: t('common.moveDown'),
             icon: 'arrow_downward',
             disabled: index === count - 1,
             onPress: () => move(1),
@@ -145,14 +158,19 @@ export function TemplateExerciseCard({
           ...(exercise.tacticalBoard
             ? [
                 {
-                  label: 'Remove tactical board',
+                  label: t('workout.removeTacticalBoard'),
                   icon: 'layers_clear' as const,
                   destructive: true,
                   onPress: confirmRemoveBoard,
                 },
               ]
             : []),
-          { label: 'Remove exercise', icon: 'delete', destructive: true, onPress: confirmRemove },
+          {
+            label: t('workout.removeExercise'),
+            icon: 'delete',
+            destructive: true,
+            onPress: confirmRemove,
+          },
         ]}
         onClose={() => setMenuOpen(false)}
       />
@@ -160,7 +178,7 @@ export function TemplateExerciseCard({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   // Like the active workout's card.
   card: {
     paddingRight: spacing.md,
@@ -179,4 +197,4 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingRight: spacing.xs,
   },
-});
+}));

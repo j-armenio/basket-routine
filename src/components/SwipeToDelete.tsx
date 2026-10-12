@@ -1,7 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { radius, size, spacing } from '@/theme/spacing';
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { AppText } from './AppText';
 import { haptics } from './haptics';
@@ -32,6 +33,8 @@ export function SwipeToDelete({
   testID,
   children,
 }: SwipeToDeleteProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const remove = () => {
     if (onDelete()) haptics.confirm();
   };
@@ -67,7 +70,7 @@ export function SwipeToDelete({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     backgroundColor: colors.surface,
   },
@@ -82,4 +85,4 @@ const styles = StyleSheet.create({
   actionText: {
     color: colors.onPrimary,
   },
-});
+}));

@@ -1,10 +1,10 @@
 import { AppText } from '@/components/AppText';
 import { ListItem } from '@/components/ListItem';
 import type { Exercise } from '@/db/types';
-import { TRACKING_LABELS } from '@/domain/types';
 import { radius, size } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 import { exerciseMedia } from './mediaSource';
 import { MediaView } from './MediaView';
@@ -21,15 +21,17 @@ type ExerciseRowProps = {
  * place until the finger lifts, like a video thumbnail on hover; a hold doesn't count as a tap.
  */
 export function ExerciseRow({ exercise, onPress, rightIcon = 'chevron_right' }: ExerciseRowProps) {
+  const { t } = useTranslation();
   const [previewing, setPreviewing] = useState(false);
-  const tracking = TRACKING_LABELS[exercise.trackingType];
-  const subtitle = exercise.isCustom ? `${tracking} · Custom` : tracking;
+  const tracking = t(`labels.tracking.${exercise.trackingType}`);
+  const custom = t('labels.category.custom');
+  const subtitle = exercise.isCustom ? `${tracking} · ${custom}` : tracking;
   // The Custom tag in green, inside the gray subtitle.
   const shownSubtitle = exercise.isCustom ? (
     <>
       {`${tracking} · `}
       <AppText variant="subtitle" weight="semiBold" tone="green">
-        Custom
+        {custom}
       </AppText>
     </>
   ) : (
@@ -39,7 +41,7 @@ export function ExerciseRow({ exercise, onPress, rightIcon = 'chevron_right' }: 
   return (
     <ListItem
       accessibilityLabel={`${exercise.name}, ${subtitle}`}
-      accessibilityHint={media ? 'Hold to play its media' : undefined}
+      accessibilityHint={media ? t('exercises.holdToPlay') : undefined}
       left={
         <MediaView
           media={media}

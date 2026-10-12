@@ -1,9 +1,11 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import type { Palette } from '@/theme/colors';
+import { useColors } from '@/theme/ThemeContext';
 import type { FontWeight } from '@/theme/fonts';
 import { border, opacity, radius, size, spacing } from '@/theme/spacing';
 import type { TypographyVariant } from '@/theme/typography';
 import type { AndroidSymbol } from 'expo-symbols';
-import { Pressable, StyleSheet, type PressableProps, type ViewStyle } from 'react-native';
+import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -37,7 +39,19 @@ type VariantStyle = {
   iconSize: number;
 };
 
-const variants: Record<Variant, VariantStyle> = {
+// Built once per palette, since the colors differ by theme.
+const variantCache = new WeakMap<Palette, Record<Variant, VariantStyle>>();
+
+function variantsOf(colors: Palette): Record<Variant, VariantStyle> {
+  let variants = variantCache.get(colors);
+  if (!variants) {
+    variants = buildVariants(colors);
+    variantCache.set(colors, variants);
+  }
+  return variants;
+}
+
+const buildVariants = (colors: Palette): Record<Variant, VariantStyle> => ({
   primary: {
     container: {
       minHeight: size.buttonPrimaryHeight,
@@ -147,7 +161,7 @@ const variants: Record<Variant, VariantStyle> = {
     text: 'button',
     iconSize: size.iconButtonGlyph,
   },
-};
+});
 
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   label: string;
@@ -167,8 +181,9 @@ export function Button({
   disabled: disabledProp,
   ...props
 }: ButtonProps) {
+  const styles = useStyles();
   const disabled = !!disabledProp;
-  const config = variants[variant];
+  const config = variantsOf(useColors())[variant];
 
   return (
     <Pressable
@@ -197,7 +212,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   base: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -214,4 +229,4 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: opacity.disabled,
   },
-});
+}));

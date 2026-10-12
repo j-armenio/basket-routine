@@ -4,7 +4,6 @@ import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
-import { reasonMessage } from '@/domain/messages';
 import { saveWorkout } from '@/features/routines/actions';
 import {
   closeDraft,
@@ -20,6 +19,7 @@ import { leaveScreen } from '@/features/workout/navigation';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 
 const parseId = (value: string | undefined) => (value === undefined ? undefined : Number(value));
@@ -31,6 +31,7 @@ const parseId = (value: string | undefined) => (value === undefined ? undefined 
  * unsaved.
  */
 export default function EditWorkoutScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const navigation = useNavigation();
   const params = useLocalSearchParams<{
@@ -68,10 +69,10 @@ export default function EditWorkoutScreen() {
       navigation.dispatch(data.action);
       return;
     }
-    Alert.alert('Discard changes?', 'Your changes to this workout will be lost.', [
-      { text: 'Keep editing', style: 'cancel' },
+    Alert.alert(t('routines.discardChangesTitle'), t('routines.discardChangesMessage'), [
+      { text: t('routines.keepEditing'), style: 'cancel' },
       {
-        text: 'Discard',
+        text: t('workout.discard'),
         style: 'destructive',
         onPress: () => {
           leaving.current = true;
@@ -83,12 +84,12 @@ export default function EditWorkoutScreen() {
 
   if (!loaded) {
     return (
-      <Screen title="Edit Workout" titleVariant="title" bottomInset>
+      <Screen title={t('routines.editWorkoutTitle')} titleVariant="title" bottomInset>
         <EmptyState
           icon="sports_basketball"
-          title="Workout not found"
-          message="This workout doesn't exist anymore."
-          action={{ label: 'Back to Workout', onPress: () => leaveScreen(router) }}
+          title={t('routines.notFoundTitle')}
+          message={t('routines.notFoundMessage')}
+          action={{ label: t('common.backToWorkout'), onPress: () => leaveScreen(router) }}
         />
       </Screen>
     );
@@ -111,23 +112,29 @@ export default function EditWorkoutScreen() {
     }
     const result = saveWorkout(toSaveInput(draft));
     if (result.ok) close();
-    else Alert.alert("Couldn't save workout", reasonMessage(result.reason));
+    else Alert.alert(t('routines.saveFailedWorkoutTitle'), t(`errors.${result.reason}`));
   };
 
   return (
     <Screen
-      title={draft.workoutId === undefined ? 'New Workout' : 'Edit Workout'}
+      title={t(
+        draft.workoutId === undefined ? 'routines.newWorkoutTitle' : 'routines.editWorkoutTitle',
+      )}
       titleVariant="title"
       left={
-        <IconButton icon="close" accessibilityLabel="Cancel" onPress={() => leaveScreen(router)} />
+        <IconButton
+          icon="close"
+          accessibilityLabel={t('common.cancel')}
+          onPress={() => leaveScreen(router)}
+        />
       }
-      footer={<BottomActionBar label="Save" onPress={save} />}
+      footer={<BottomActionBar label={t('common.save')} onPress={save} />}
       bottomInset
       keyboardAvoiding
     >
       <TextField
-        accessibilityLabel="Workout name"
-        placeholder="Workout name"
+        accessibilityLabel={t('routines.workoutNamePlaceholder')}
+        placeholder={t('routines.workoutNamePlaceholder')}
         value={draft.name}
         onChangeText={(name) => updateDraft((current) => rename(current, name))}
         autoFocus={draft.workoutId === undefined}
@@ -136,8 +143,8 @@ export default function EditWorkoutScreen() {
       {draft.exercises.length === 0 ? (
         <EmptyState
           icon="sports_basketball"
-          title="Add your first exercise"
-          message="Pick a drill from the catalog and set the target of every set."
+          title={t('workout.emptyTitle')}
+          message={t('routines.emptyExerciseMessage')}
         />
       ) : (
         <DraggableExerciseList exercises={draft.exercises} />
@@ -145,7 +152,7 @@ export default function EditWorkoutScreen() {
       <Button
         variant="secondary"
         icon="add"
-        label="Add Exercise"
+        label={t('workout.addExercise')}
         fullWidth
         onPress={() => router.push('/add-exercise?to=template')}
       />

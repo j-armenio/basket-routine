@@ -2,7 +2,7 @@ import { exercises } from '@/db/schema';
 import { getInProgressSession, getSessionDetail } from '@/db/repositories/sessions';
 import type { Db } from '@/db/types';
 import type { TargetMode } from '@/domain/types';
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react-native';
 import { eq } from 'drizzle-orm';
 import { addExercise, discardWorkout, startEmptyWorkout, updateSet } from './actions';

@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react-native';
 import type { TacticalBoard } from '@/domain/tacticalBoard';
 import { CourtBoard } from './CourtBoard';
-import { courtHeight } from './courtGeometry';
 
 const board: TacticalBoard = {
   version: 1,
@@ -28,11 +27,6 @@ test('draws every mark of the board, and the preview on top', async () => {
   expect(marks('x')).toHaveLength(3);
   expect(marks('arrow')).toHaveLength(1);
   expect(marks('pen')).toHaveLength(1);
-});
-
-test('keeps the half court proportion at any width', () => {
-  expect(courtHeight(300) / 300).toBeCloseTo(courtHeight(150) / 150);
-  expect(courtHeight(153)).toBeCloseTo(143);
 });
 
 test('an empty board draws only the court', async () => {

@@ -1,8 +1,10 @@
 import { Icon } from '@/components/Icon';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, opacity, radius, size } from '@/theme/spacing';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, View } from 'react-native';
 import { deleteSet, updateSet } from './actions';
 import type { SessionSetDetail } from './hooks';
 import { SetNumber } from './SetNumber';
@@ -17,11 +19,14 @@ type CheckSetRowProps = {
 };
 
 export function CheckSetRow({ set, number, deletable }: CheckSetRowProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   return (
     <SwipeToDelete
       testID={`set-${number}`}
       enabled={deletable}
-      deleteLabel={`Delete set ${number}`}
+      deleteLabel={t('workout.deleteSet', { number })}
       onDelete={() => deleteSet(set.id).ok}
     >
       <View style={setTable.row}>
@@ -29,7 +34,7 @@ export function CheckSetRow({ set, number, deletable }: CheckSetRowProps) {
         <View style={setTable.doneColumn}>
           <Pressable
             accessibilityRole="checkbox"
-            accessibilityLabel={`Set ${number} done`}
+            accessibilityLabel={t('workout.setDoneLabel', { number })}
             accessibilityState={{ checked: set.completed }}
             onPress={() => updateSet(set.id, { completed: !set.completed })}
             style={({ pressed }) => [
@@ -49,7 +54,7 @@ export function CheckSetRow({ set, number, deletable }: CheckSetRowProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   toggle: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -65,4 +70,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: opacity.pressed,
   },
-});
+}));

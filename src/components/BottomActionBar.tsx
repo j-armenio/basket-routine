@@ -1,7 +1,6 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { border, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from './Button';
 
@@ -16,6 +15,7 @@ type BottomActionBarProps = {
  * button on `backgroundDeep`. Goes in `Screen`'s `footer`.
  */
 export function BottomActionBar({ label, icon, onPress }: BottomActionBarProps) {
+  const styles = useStyles();
   return (
     // The bottom inset is added to the padding.
     <SafeAreaView edges={['bottom']} style={styles.bar}>
@@ -24,7 +24,7 @@ export function BottomActionBar({ label, icon, onPress }: BottomActionBarProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   bar: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.screenPadding,
@@ -32,4 +32,4 @@ const styles = StyleSheet.create({
     borderTopColor: colors.divider,
     backgroundColor: colors.backgroundDeep,
   },
-});
+}));

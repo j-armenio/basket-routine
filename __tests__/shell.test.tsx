@@ -39,7 +39,7 @@ test('starts on Workout and switches between the three tabs', async () => {
   await app;
 
   expect(app.getPathname()).toBe('/');
-  expect(screen.getByText('Quick Start')).toBeOnTheScreen();
+  expect(screen.getByText('No routines yet')).toBeOnTheScreen();
   const start = screen.getByRole('button', { name: 'Start Empty Workout' });
   expect(start).toBeEnabled();
   expect(screen.queryByText('Workout in progress')).toBeNull();

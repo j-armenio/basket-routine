@@ -23,13 +23,21 @@ export function parseCount(text: string): ParsedCount {
   return Number.isSafeInteger(value) ? { kind: 'value', value } : { kind: 'invalid' };
 }
 
-/** `42 min`, or `1 h 05 min` from one hour on, rounded to the nearest minute; `< 1 min` under one. */
-export function formatDuration(ms: number): string {
-  if (ms < 60_000) return '< 1 min';
+export type DurationParts =
+  | { kind: 'under_minute' }
+  | { kind: 'minutes'; minutes: number }
+  | { kind: 'hours_minutes'; hours: number; minutes: number };
+
+/**
+ * A duration's numbers, rounded to the nearest minute: under a minute, minutes alone, or hours
+ * and minutes from one hour on. `src/i18n/format.ts` writes the words around them.
+ */
+export function durationParts(ms: number): DurationParts {
+  if (ms < 60_000) return { kind: 'under_minute' };
   const totalMinutes = Math.max(0, Math.round(ms / 60_000));
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  return hours === 0 ? `${minutes} min` : `${hours} h ${String(minutes).padStart(2, '0')} min`;
+  return hours === 0 ? { kind: 'minutes', minutes } : { kind: 'hours_minutes', hours, minutes };
 }
 
 /** The active workout's timer: `04:07`, or `1:02:03` from one hour on. Whole seconds, rounded down. */
@@ -44,9 +52,9 @@ export function formatElapsed(ms: number): string {
     : `${hours}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-/** `Thu, Sep 24, 2026`, in English like the rest of the UI. */
-export function formatWorkoutDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
+/** `Thu, Sep 24, 2026`, in the given `Intl` locale. */
+export function formatWorkoutDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -55,23 +63,24 @@ export function formatWorkoutDate(date: Date): string {
 }
 
 /** `Sep 25`, the FG% chart's date labels. */
-export function formatShortDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+export function formatShortDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 /** `Mon, Sep 28`, a recent session in an exercise's stats. */
-export function formatDayDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+export function formatDayDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 /** `September 2026`, the History list's month headers. */
-export function formatMonth(date: Date): string {
-  return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+export function formatMonth(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 }
 
-/** `Free Throws, Mikan Drill, Layups`, or the first `max` names and `+N more`. */
-export function formatExerciseList(names: readonly string[], max = 3): string {
-  if (names.length === 0) return 'No exercises';
-  if (names.length <= max) return names.join(', ');
-  return `${names.slice(0, max).join(', ')} +${names.length - max} more`;
+/** A names list split for display: the first `max`, and how many were left out. `src/i18n/format.ts` writes the words. */
+export function splitExerciseList(
+  names: readonly string[],
+  max = 3,
+): { shown: string[]; moreCount: number } {
+  return { shown: names.slice(0, max), moreCount: Math.max(0, names.length - max) };
 }

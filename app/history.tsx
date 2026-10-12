@@ -6,27 +6,31 @@ import { useHistory } from '@/features/history/hooks';
 import { HistoryRow } from '@/features/history/HistoryRow';
 import { MonthHeader } from '@/features/history/MonthHeader';
 import { workoutsLogged } from '@/features/profile/profileText';
+import { useLanguage } from '@/features/settings/hooks';
 import { leaveScreen } from '@/features/workout/navigation';
 import { spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SectionList, StyleSheet, View } from 'react-native';
 
 /** Every finished session, by month, newest first: the Profile's "See all". */
 export default function HistoryScreen() {
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const router = useRouter();
   const items = useHistory();
-  const sections = useMemo(() => groupByMonth(items), [items]);
+  const sections = useMemo(() => groupByMonth(items, locale), [items, locale]);
 
   return (
     <Screen
-      title="History"
+      title={t('history.title')}
       titleVariant="titleLarge"
-      subtitle={items.length > 0 ? workoutsLogged(items.length) : undefined}
+      subtitle={items.length > 0 ? workoutsLogged(t, items.length) : undefined}
       left={
         <IconButton
           icon="arrow_back"
-          accessibilityLabel="Back"
+          accessibilityLabel={t('common.back')}
           onPress={() => leaveScreen(router)}
         />
       }
@@ -36,8 +40,8 @@ export default function HistoryScreen() {
       {items.length === 0 ? (
         <EmptyState
           icon="history"
-          title="No workouts yet"
-          message="Finished workouts will show up here."
+          title={t('history.emptyTitle')}
+          message={t('history.emptyMessage')}
         />
       ) : (
         <SectionList

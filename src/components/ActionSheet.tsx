@@ -1,6 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { opacity, radius, size, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
+import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from './AppText';
@@ -28,6 +30,8 @@ type ActionSheetProps = {
  * most. The backdrop and the Android back button close it. An option runs, then closes it.
  */
 export function ActionSheet({ visible, title, options, onClose }: ActionSheetProps) {
+  const styles = useStyles();
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -40,7 +44,7 @@ export function ActionSheet({ visible, title, options, onClose }: ActionSheetPro
       <View style={styles.root}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Close menu"
+          accessibilityLabel={t('common.closeMenu')}
           style={[StyleSheet.absoluteFill, styles.backdrop]}
           onPress={onClose}
         />
@@ -64,7 +68,7 @@ export function ActionSheet({ visible, title, options, onClose }: ActionSheetPro
               }}
             />
           ))}
-          <Row label="Cancel" onPress={onClose} />
+          <Row label={t('common.cancel')} onPress={onClose} />
         </SafeAreaView>
       </View>
     </Modal>
@@ -74,6 +78,8 @@ export function ActionSheet({ visible, title, options, onClose }: ActionSheetPro
 type RowProps = Omit<ActionSheetOption, 'onPress'> & { onPress: () => void };
 
 function Row({ label, icon, destructive, disabled, selected, onPress }: RowProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const textColor = destructive ? colors.error : colors.textPrimary;
   const iconColor = destructive ? colors.error : colors.iconMuted;
   return (
@@ -94,7 +100,7 @@ function Row({ label, icon, destructive, disabled, selected, onPress }: RowProps
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   root: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -129,4 +135,4 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: opacity.disabled,
   },
-});
+}));

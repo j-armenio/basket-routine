@@ -9,7 +9,7 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 
 | Rota | Arquivo | Papel |
 |---|---|---|
-| `/` | `app/(tabs)/index.tsx` | Aba Workout: rotinas como seções, com os cards de workout |
+| `/` | `app/(tabs)/index.tsx` | Aba Workout: chips de rotina (a selecionada mostra seus workouts), `+` de New Routine no cabeçalho e o FAB Start Empty Workout |
 | `/exercises` | `app/(tabs)/exercises.tsx` | Aba Exercises: busca + cards de categoria (5 categorias + Custom) |
 | `/profile` | `app/(tabs)/profile.tsx` | Aba Profile: botão de Settings, perfil, estatísticas, gráfico de FG%, últimas 5 sessões |
 | — | `app/(tabs)/_layout.tsx` | Abas (`js-top-tabs` com a barra embaixo, swipe entre abas, `ResumeBanner`) |
@@ -21,7 +21,7 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 | `/edit-profile` | `app/edit-profile.tsx` | Formulário do perfil (nome e foto) |
 | `/tactical-board` | `app/tactical-board.tsx` | Editor da prancheta tática (`?sessionExerciseId=` ou `?draftKey=`) |
 | `/history` | `app/history.tsx` | Histórico completo por mês (o "See all" do Profile) |
-| `/settings` | `app/settings.tsx` | Configurações (aberta pelo botão no topo do Profile); estado vazio por enquanto, com a versão do app no rodapé |
+| `/settings` | `app/settings.tsx` | Configurações (aberta pelo botão no topo do Profile): seção Appearance (System / Light / Dark) e seção de idioma (`ChipRow` cada), versão do app no rodapé |
 | `/session/[id]` | `app/session/[id].tsx` | Detalhe somente leitura de uma sessão finalizada |
 | `/workout-summary/[id]` | `app/workout-summary/[id].tsx` | Resumo exibido depois do Finish |
 | `/exercise/[id]` | `app/exercise/[id].tsx` | Detalhe do exercício (mídia, descrição, "Your stats", menu ⋮ se custom) |
@@ -39,11 +39,14 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 | `exerciseStats.ts` | Estatísticas de um exercício ao longo das sessões |
 | `template.ts` | Estrutura comum de template e sessão (detecta se a estrutura mudou no Finish) |
 | `tacticalBoard.ts` | Modelo da prancheta (pontos normalizados, elementos), regras e comparação |
-| `format.ts` | Formatação de FG%, contagens, duração, timer, datas |
+| `format.ts` | Formatação de FG%, contagens, timer, `durationParts` e datas (recebem `locale`); sem palavras em inglês |
 | `media.ts` | Tipo de mídia pela extensão, limite de vídeo |
-| `defaults.ts` | Metas padrão, nome do workout pela hora do dia |
+| `defaults.ts` | Metas padrão, `timeOfDay` (manhã/tarde/noite, sem o nome em si) |
 | `order.ts` | `moveItem` (reordenação) |
-| `messages.ts` | `reasonMessage`: texto de cada `reason` de erro |
+
+Nenhum arquivo aqui importa i18n nem guarda texto em inglês (`messages.ts` e os mapas `*_LABELS`
+foram removidos na Fase 9.5): `src/i18n/` e a camada de UI transformam `reason`, enums e os
+números acima em palavras.
 
 ## `src/db/`: persistência (SQLite + Drizzle)
 
@@ -58,6 +61,17 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 | `repositories/` | Funções `(db, ...)` por agregado: `exercises`, `routines`, `workouts`, `sessions` (+ `common.ts`) |
 | `test-utils.ts` | `createTestDb()`: banco em memória com as migrations reais |
 
+## `src/i18n/`: i18next
+
+| Arquivo | Papel |
+|---|---|
+| `translations/en.ts` | Dicionário em inglês, agrupado por feature; é o formato que `pt-BR.ts` segue (uma chave errada ou faltando falha o `typecheck`); `errors` é tipado `Record<DomainErrorReason, string>` |
+| `translations/pt-BR.ts` | Dicionário em português, mesmas chaves |
+| `translations/parity.test.ts` | Garante que os dois arquivos têm exatamente as mesmas chaves |
+| `i18n.ts` | Inicializa o i18next no idioma salvo (lido de forma síncrona), com fallback `en`; importado uma vez em `app/_layout.tsx` antes da primeira renderização |
+| `i18next.d.ts` | `CustomTypeOptions` a partir de `en.ts`, para `t('chave')` ser tipado |
+| `format.ts` | As palavras em volta de `durationParts` e `splitExerciseList` do domain, recebendo `t` |
+
 ## `src/features/`: uma pasta por funcionalidade
 
 Padrão de cada feature: `actions.ts` (toda escrita: chama o repositório, avisa o `dataStore`,
@@ -68,11 +82,12 @@ versão, `run`, `ActionResult`).
 | Pasta | Conteúdo |
 |---|---|
 | `workout/` | Treino ativo: `ExerciseCard`, linhas de set (`ShootingSetRow`, `CheckSetRow`, `SetNumber`), `useNumberCell` + `setDraft` (salvar a cada tecla, desfazer no blur), `setTable` (colunas), `SetTableHeader`, `ExerciseNote`, `ResumeBanner`, `TargetModeSheet`, `navigation.ts` (`leaveScreen`) |
-| `routines/` | Rotinas e templates: `RoutineSection`, `WorkoutCard`, `RoutineChoiceSection`, listas arrastáveis (`DraggableRoutineList`, `DraggableExerciseList`), o editor (`templateDraft.ts`, `draftStore.ts`, `loadDraft.ts`, `TemplateExerciseCard`, `TemplateSetRow`) |
+| `routines/` | Rotinas e templates: `RoutineSection`, `WorkoutCard`, `RoutineChoiceSection`, lista arrastável de exercícios (`DraggableExerciseList`), o editor (`templateDraft.ts`, `draftStore.ts`, `loadDraft.ts`, `TemplateExerciseCard`, `TemplateSetRow`) |
 | `history/` | Histórico: `historyList.ts` (itens, agrupamento por mês, dados do gráfico, estatísticas do perfil), `HistoryRow`, `MonthHeader`, `SessionTotals`, `SessionExerciseView`, `FgChart`, `FgEvolutionCard` |
 | `exercises/` | Catálogo: `catalogList.ts`, `CategoryCard` + `categoryImages.ts`, `ExerciseList`, `ExerciseRow`, `ExerciseStatsCard`, mídia (`MediaView`, `mediaSource`, `mediaFiles`, `seedMedia`, `videoThumbnail`) |
 | `profile/` | Perfil: `profileStorage.ts` (nome e foto no `expo-sqlite/kv-store`, fora do schema), `actions.ts`, `hooks.ts`, `Avatar`, `ProfileCard`, `ProfileStatsCard`, `profileText.ts` |
-| `tacticalBoard/` | Prancheta tática: `CourtBoard` (SVG da meia quadra), `BoardToolbar`, `boardEditor.ts` (estado do editor e ferramentas), `courtGeometry.ts`, `loadBoard.ts` (sessão ou rascunho), `TacticalBoardSlot` (miniatura no card) |
+| `settings/` | Idioma e tema (Fase 9.5): `languages.ts` (os dois códigos suportados, cada um com seu locale `Intl` e seu nome escrito nele mesmo), `languageStorage.ts` (`readLanguage`/`writeLanguage` no `expo-sqlite/kv-store`, mesmo arquivo do perfil), `actions.ts` (`setLanguage`), `hooks.ts` (`useLanguage`), `LanguagePickerGate.tsx` (seletor de idioma, não é uma rota), `launchGate.ts` (`askLanguageOnLaunch()` = `__DEV__`: a cada abertura só em desenvolvimento; desligado no Jest), `themeStorage.ts` (preferência de tema no `expo-sqlite/kv-store`, padrão `dark`), `themePreference.ts` (store + `useThemePreference`), `setThemePreference` em `actions.ts` |
+| `tacticalBoard/` | Prancheta tática: `CourtBoard` (SVG da meia quadra), `BoardToolbar`, `boardEditor.ts` (estado do editor e ferramentas), `courtGeometry.ts`, `loadBoard.ts` (sessão ou rascunho), `TacticalBoardSlot` (miniatura no card), `boardDescription.ts` (`describeBoard(t, board)`, a descrição para leitor de tela) |
 
 ## `src/components/`, `src/theme/`, `src/test-utils/`
 
@@ -80,7 +95,7 @@ versão, `run`, `ActionResult`).
   `IconButton`, `NumberInput`, `TextField`, `ChipRow`, `ActionSheet`, `NameDialog`,
   `SwipeToDelete`, `TabBar`, `BottomActionBar`, `Fab`, `ElapsedTimer`, `StatTile`, `EmptyState`),
   `fgTone.ts`, `haptics.ts` e os hooks de teclado.
-- `theme/`: tokens (`colors`, `fonts`, `typography`, `spacing`, `navigationTheme`). Os papéis
+- `theme/`: tokens (`colors` com as paletas `darkColors` e `lightColors`, `fonts`, `typography`, `spacing`, `navigationThemeFor`), `scheme.ts` (preferência e `resolveScheme`), `ThemeContext.tsx` (`AppThemeProvider`, `useTheme`, `useColors`) e `makeStyles.ts` (estilos por paleta, em cache). Os papéis
   estão em `docs/design.md`.
 - `test-utils/a11y.ts`: `expectAccessibleControls()`, chamado em todo teste de fluxo.
 
@@ -89,9 +104,10 @@ versão, `run`, `ActionResult`).
 - Unitários ao lado do código (`*.test.ts(x)`); os de banco usam o docblock
   `@jest-environment node` e `createTestDb()`.
 - Fluxos de ponta a ponta em `__tests__/` (`shell`, `active-workout`, `routines`, `history`,
-  `exercises`, `tactical-board`), com `renderRouter` e o layout raiz real.
+  `exercises`, `tactical-board`, `language`, `theme`), com `renderRouter` e o layout raiz real.
 - `jest.setup.js`: mocks de módulos nativos (haptics, file system, image picker, image, video,
-  swipeable).
+  swipeable, `expo-sqlite/kv-store` em memória) e importa `src/i18n/i18n.ts`, para o i18next
+  estar inicializado (em inglês) em todo teste, não só nos que renderizam o layout raiz real.
 
 ## Configuração e build
 

@@ -5,10 +5,12 @@ import { fgTone } from '@/components/fgTone';
 import { Icon } from '@/components/Icon';
 import { fgBand } from '@/domain/fg';
 import { formatFgPct } from '@/domain/format';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { opacity, size, spacing } from '@/theme/spacing';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, View } from 'react-native';
 import { FgChart } from './FgChart';
 import {
   CHART_RANGES,
@@ -27,6 +29,9 @@ type FgEvolutionCardProps = {
 
 /** The top of History: the latest session's FG% and the chart of the last few (or all). */
 export function FgEvolutionCard({ points, range, onChangeRange }: FgEvolutionCardProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const latest = points.at(-1);
   if (!latest) return null;
@@ -34,16 +39,18 @@ export function FgEvolutionCard({ points, range, onChangeRange }: FgEvolutionCar
     <Card style={styles.card}>
       <View style={styles.header}>
         <AppText variant="sectionTitle" accessibilityRole="header">
-          FG% evolution
+          {t('history.evolutionTitle')}
         </AppText>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Chart range, ${chartRangeLabel(range).toLowerCase()}`}
+          accessibilityLabel={t('history.chartRangeAccessibility', {
+            range: chartRangeLabel(t, range).toLowerCase(),
+          })}
           onPress={() => setMenuOpen(true)}
           style={({ pressed }) => [styles.rangeButton, pressed && styles.pressed]}
         >
           <AppText variant="caption" weight="bold" tone="secondary">
-            {chartRangeShortLabel(range)}
+            {chartRangeShortLabel(t, range)}
           </AppText>
           <Icon name="keyboard_arrow_down" size={size.iconSmall} color={colors.iconMuted} />
         </Pressable>
@@ -53,15 +60,15 @@ export function FgEvolutionCard({ points, range, onChangeRange }: FgEvolutionCar
           {formatFgPct(latest.fgPct)}
         </AppText>
         <AppText variant="subtitle" tone="secondary">
-          latest workout
+          {t('history.latestWorkout')}
         </AppText>
       </View>
       <FgChart points={points} all={range === 'all'} />
       <ActionSheet
         visible={menuOpen}
-        title="Show in the chart"
+        title={t('history.showInChart')}
         options={CHART_RANGES.map((option) => ({
-          label: chartRangeLabel(option),
+          label: chartRangeLabel(t, option),
           selected: option === range,
           onPress: () => onChangeRange(option),
         }))}
@@ -71,7 +78,7 @@ export function FgEvolutionCard({ points, range, onChangeRange }: FgEvolutionCar
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     paddingBottom: spacing.mdPlus,
     gap: spacing.xs,
@@ -102,4 +109,4 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.sm,
   },
-});
+}));

@@ -6,10 +6,12 @@ export const DEFAULT_TARGET_VALUE: Record<TargetMode, number> = {
   makes: 5,
 };
 
-/** The name of an empty workout, after the local time of day it starts. */
-export function defaultWorkoutName(date: Date): string {
+export type TimeOfDay = 'morning' | 'afternoon' | 'evening';
+
+/** The time of day a date falls in, for an empty workout's default name. */
+export function timeOfDay(date: Date): TimeOfDay {
   const hour = date.getHours();
-  if (hour < 12) return 'Morning Workout';
-  if (hour < 18) return 'Afternoon Workout';
-  return 'Evening Workout';
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
 }

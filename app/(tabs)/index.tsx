@@ -1,15 +1,16 @@
-import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { ChipRow } from '@/components/ChipRow';
 import { EmptyState } from '@/components/EmptyState';
+import { Fab, FAB_CLEARANCE } from '@/components/Fab';
+import { IconButton } from '@/components/IconButton';
 import { NameDialog } from '@/components/NameDialog';
 import { Screen } from '@/components/Screen';
 import type { RoutineWithWorkouts } from '@/db/repositories/routines';
-import { reasonMessage } from '@/domain/messages';
+import type { DomainErrorReason } from '@/domain/errors';
+import { moveItem } from '@/domain/order';
 import { spacing } from '@/theme/spacing';
-import { createRoutine, renameRoutine } from '@/features/routines/actions';
-import { DraggableRoutineList } from '@/features/routines/DraggableRoutineList';
+import { createRoutine, moveRoutine, renameRoutine } from '@/features/routines/actions';
 import { useRoutines } from '@/features/routines/hooks';
+import { RoutineSection } from '@/features/routines/RoutineSection';
 import {
   discardAndStartFromTemplate,
   startEmptyWorkout,
@@ -18,25 +19,35 @@ import {
 import { useInProgressSession } from '@/features/workout/hooks';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, ScrollView, StyleSheet } from 'react-native';
 
 type Dialog = { kind: 'new' } | { kind: 'rename'; routine: RoutineWithWorkouts };
 
 export default function WorkoutScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const session = useInProgressSession();
   const routines = useRoutines();
   const [dialog, setDialog] = useState<Dialog | null>(null);
+  // The routine whose workouts show. Nothing is stored: the tab opens on the first routine, and a
+  // routine that no longer exists (deleted) falls back to it too.
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const selectedIndex = Math.max(
+    0,
+    routines.findIndex((routine) => routine.id === selectedId),
+  );
+  const selected = routines.at(selectedIndex);
 
-  const startOrResume = () => {
-    if (session || startEmptyWorkout().ok) router.push('/active-workout');
+  const startEmpty = () => {
+    if (startEmptyWorkout().ok) router.push('/active-workout');
   };
 
   const openActiveWorkout = (started: { ok: boolean }) => {
     if (started.ok) router.push('/active-workout');
   };
-  const showFailure = (reason: Parameters<typeof reasonMessage>[0]) =>
-    Alert.alert("Couldn't start workout", reasonMessage(reason));
+  const showFailure = (reason: DomainErrorReason) =>
+    Alert.alert(t('routines.startFailedTitle'), t(`errors.${reason}`));
 
   const startTemplate = (workoutId: number, workoutName: string) => {
     if (!session) {
@@ -46,13 +57,13 @@ export default function WorkoutScreen() {
       return;
     }
     Alert.alert(
-      'Workout in progress',
-      `"${session.name}" is still going. Start "${workoutName}" instead?`,
+      t('workout.inProgress'),
+      t('routines.sessionInProgressMessage', { current: session.name, next: workoutName }),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Resume', onPress: () => router.push('/active-workout') },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('routines.resume'), onPress: () => router.push('/active-workout') },
         {
-          text: 'Discard and start',
+          text: t('routines.discardAndStart'),
           style: 'destructive',
           onPress: () => {
             const result = discardAndStartFromTemplate(workoutId);
@@ -64,71 +75,99 @@ export default function WorkoutScreen() {
     );
   };
 
+  const showSaveFailure = (reason: DomainErrorReason) =>
+    Alert.alert(t('routines.saveRoutineFailedTitle'), t(`errors.${reason}`));
+
   const confirmDialog = (name: string) => {
     const current = dialog;
     setDialog(null);
-    const result =
-      current?.kind === 'rename' ? renameRoutine(current.routine.id, name) : createRoutine(name);
-    if (!result.ok) Alert.alert("Couldn't save routine", reasonMessage(result.reason));
+    if (current?.kind === 'rename') {
+      const result = renameRoutine(current.routine.id, name);
+      if (!result.ok) showSaveFailure(result.reason);
+      return;
+    }
+    const result = createRoutine(name);
+    if (result.ok) setSelectedId(result.value.id);
+    else showSaveFailure(result.reason);
   };
 
   return (
-    <Screen title="Workout">
-      <Card style={styles.quickStart}>
-        <AppText variant="sectionTitle" accessibilityRole="header">
-          Quick Start
-        </AppText>
-        <Button
-          label={session ? 'Resume Workout' : 'Start Empty Workout'}
-          icon={session ? 'play_arrow' : 'add'}
-          caps
-          fullWidth
-          onPress={startOrResume}
-        />
-      </Card>
-      <View style={styles.heading}>
-        <AppText variant="headline" accessibilityRole="header" style={styles.headingText}>
-          Routines
-        </AppText>
-        {routines.length > 0 && (
-          <Button
-            variant="tonal"
+    <Screen
+      title={t('tabs.workout')}
+      // Rarely needed, so a plain button up here; with no routine yet, the empty state has its own.
+      right={
+        routines.length > 0 ? (
+          <IconButton
             icon="add"
-            label="New Routine"
+            variant="outlined"
+            accessibilityLabel={t('routines.newRoutine')}
             onPress={() => setDialog({ kind: 'new' })}
           />
-        )}
-      </View>
-      {routines.length === 0 ? (
+        ) : undefined
+      }
+      scroll={false}
+    >
+      {selected === undefined ? (
         <EmptyState
           icon="sports_basketball"
-          title="No routines yet"
-          message="Create a routine to plan your training."
-          action={{ label: 'New Routine', onPress: () => setDialog({ kind: 'new' }) }}
+          title={t('routines.emptyTitle')}
+          message={t('routines.emptyMessage')}
+          action={{ label: t('routines.newRoutine'), onPress: () => setDialog({ kind: 'new' }) }}
         />
       ) : (
-        <DraggableRoutineList
-          routines={routines}
-          onRename={(routine) => setDialog({ kind: 'rename', routine })}
-          onNewWorkout={(routine) =>
-            router.push({ pathname: '/edit-workout', params: { routineId: routine.id } })
-          }
-          onEditWorkout={(workoutId) =>
-            router.push({ pathname: '/edit-workout', params: { workoutId } })
-          }
-          onStartWorkout={(routine, workoutId) =>
-            startTemplate(
-              workoutId,
-              routine.workouts.find((workout) => workout.id === workoutId)?.name ?? '',
-            )
-          }
-        />
+        <>
+          <ChipRow
+            options={routines.map((routine) => ({
+              value: String(routine.id),
+              label: routine.name,
+            }))}
+            value={String(selected.id)}
+            onChange={(value) => setSelectedId(Number(value))}
+          />
+          <ScrollView
+            style={styles.workouts}
+            contentContainerStyle={styles.workoutsContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <RoutineSection
+              routine={selected}
+              index={selectedIndex}
+              count={routines.length}
+              onRename={() => setDialog({ kind: 'rename', routine: selected })}
+              onMove={(delta) => {
+                // Pinned, so the chip keeps the selection as it moves, even if it was only the default.
+                setSelectedId(selected.id);
+                moveRoutine(
+                  moveItem(
+                    routines.map((routine) => routine.id),
+                    selectedIndex,
+                    delta,
+                  ),
+                );
+              }}
+              onNewWorkout={() =>
+                router.push({ pathname: '/edit-workout', params: { routineId: selected.id } })
+              }
+              onEditWorkout={(workoutId) =>
+                router.push({ pathname: '/edit-workout', params: { workoutId } })
+              }
+              onStartWorkout={(workoutId) =>
+                startTemplate(
+                  workoutId,
+                  selected.workouts.find((workout) => workout.id === workoutId)?.name ?? '',
+                )
+              }
+            />
+          </ScrollView>
+        </>
       )}
+      {/* Resuming a running workout is the banner's job, above the tab bar. */}
+      {!session && <Fab label={t('routines.startEmptyWorkout')} icon="add" onPress={startEmpty} />}
       <NameDialog
         visible={dialog !== null}
-        title={dialog?.kind === 'rename' ? 'Rename Routine' : 'New Routine'}
+        title={t(dialog?.kind === 'rename' ? 'routines.renameRoutineTitle' : 'routines.newRoutine')}
         initialName={dialog?.kind === 'rename' ? dialog.routine.name : ''}
-        confirmLabel={dialog?.kind === 'rename' ? 'Save' : 'Create'}
+        confirmLabel={t(dialog?.kind === 'rename' ? 'common.save' : 'routines.create')}
         onConfirm={confirmDialog}
         onClose={() => setDialog(null)}
       />
@@ -137,20 +176,11 @@ export default function WorkoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  quickStart: {
-    paddingHorizontal: spacing.cardPaddingCompact,
-    paddingBottom: spacing.cardPaddingCompact,
-    gap: spacing.mdPlus,
-  },
-  heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-    paddingLeft: spacing.xs,
-  },
-  headingText: {
+  workouts: {
     flex: 1,
+  },
+  workoutsContent: {
+    paddingTop: spacing.xs,
+    paddingBottom: FAB_CLEARANCE,
   },
 });

@@ -1,4 +1,4 @@
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { fonts } from '@/theme/fonts';
 import { render, screen } from '@testing-library/react-native';
 import { AppText } from './AppText';

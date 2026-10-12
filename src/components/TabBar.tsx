@@ -1,4 +1,5 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, size, spacing } from '@/theme/spacing';
 import type {
   MaterialTopTabNavigationEventMap,
@@ -10,7 +11,7 @@ import {
   type ParamListBase,
   type TabNavigationState,
 } from 'expo-router/react-navigation';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from './AppText';
 import { useKeyboardVisible } from './useKeyboardVisible';
@@ -27,6 +28,8 @@ export type TabBarProps = {
  * screen's `tabBarAccessibilityLabel`.
  */
 export function TabBar({ state, descriptors, navigation }: TabBarProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const keyboardVisible = useKeyboardVisible();
   if (keyboardVisible) return null;
@@ -91,7 +94,7 @@ export function TabBar({ state, descriptors, navigation }: TabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   bar: {
     flexDirection: 'row',
     gap: spacing.xs,
@@ -123,4 +126,4 @@ const styles = StyleSheet.create({
     borderRadius: size.navPillHeight / 2,
     backgroundColor: colors.secondary,
   },
-});
+}));

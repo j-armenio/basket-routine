@@ -4,25 +4,28 @@ import { BottomActionBar } from '@/components/BottomActionBar';
 import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
-import { reasonMessage } from '@/domain/messages';
-import { CATEGORY_LABELS, TRACKING_LABELS } from '@/domain/types';
 import { deleteExercise, exerciseUsage } from '@/features/exercises/actions';
 import { ExerciseStatsCard } from '@/features/exercises/ExerciseStatsCard';
 import { exerciseMedia } from '@/features/exercises/mediaSource';
 import { MediaView } from '@/features/exercises/MediaView';
 import { useExercise } from '@/features/exercises/hooks';
 import { leaveScreen } from '@/features/workout/navigation';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { radius, size } from '@/theme/spacing';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, View } from 'react-native';
 
 /**
  * An exercise: its media, large and playing, its description and the user's stats with it, and
  * Add to Routine. Custom ones can be edited and deleted.
  */
 export default function ExerciseDetailScreen() {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const exercise = useExercise(Number(id));
@@ -31,18 +34,25 @@ export default function ExerciseDetailScreen() {
   // renders nothing, so "not found" doesn't flash on the way out.
   const [mountedWithExercise] = useState(exercise !== undefined);
   const back = (
-    <IconButton icon="arrow_back" accessibilityLabel="Back" onPress={() => leaveScreen(router)} />
+    <IconButton
+      icon="arrow_back"
+      accessibilityLabel={t('common.back')}
+      onPress={() => leaveScreen(router)}
+    />
   );
 
   if (!exercise) {
     if (mountedWithExercise) return null;
     return (
-      <Screen title="Exercise" titleVariant="titleLarge" left={back} bottomInset>
+      <Screen title={t('exercises.detailTitle')} titleVariant="titleLarge" left={back} bottomInset>
         <EmptyState
           icon="sports_basketball"
-          title="Exercise not found"
-          message="This exercise doesn't exist anymore."
-          action={{ label: 'Back to Exercises', onPress: () => router.dismissTo('/exercises') }}
+          title={t('exercises.notFoundTitle')}
+          message={t('exercises.notFoundMessage')}
+          action={{
+            label: t('common.backToExercises'),
+            onPress: () => router.dismissTo('/exercises'),
+          }}
         />
       </Screen>
     );
@@ -51,35 +61,36 @@ export default function ExerciseDetailScreen() {
   const remove = () => {
     const result = deleteExercise(exercise.id);
     if (result.ok) leaveScreen(router);
-    else Alert.alert("Couldn't delete exercise", reasonMessage(result.reason));
+    else Alert.alert(t('exercises.deleteFailedTitle'), t(`errors.${result.reason}`));
   };
 
   const confirmDelete = () => {
     const workouts = exerciseUsage(exercise.id);
-    const removal =
-      workouts > 0
-        ? `It will be removed from ${workouts} ${workouts === 1 ? 'workout' : 'workouts'}. `
-        : '';
-    Alert.alert(`Delete "${exercise.name}"?`, `${removal}Your history stays.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: remove },
-    ]);
+    const removal = workouts > 0 ? t('exercises.removedFromWorkouts', { count: workouts }) : '';
+    Alert.alert(
+      t('exercises.deleteExerciseTitle', { name: exercise.name }),
+      `${removal}${t('routines.historyStays')}`,
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: remove },
+      ],
+    );
   };
 
   const options: ActionSheetOption[] = [
     {
-      label: 'Edit',
+      label: t('common.edit'),
       icon: 'edit',
       onPress: () => router.push(`/edit-exercise?exerciseId=${exercise.id}`),
     },
-    { label: 'Delete', icon: 'delete', destructive: true, onPress: confirmDelete },
+    { label: t('common.delete'), icon: 'delete', destructive: true, onPress: confirmDelete },
   ];
 
   return (
     <Screen
       title={exercise.name}
       titleVariant="titleLarge"
-      subtitle={`${CATEGORY_LABELS[exercise.category]} · ${TRACKING_LABELS[exercise.trackingType]}`}
+      subtitle={`${t(`labels.category.${exercise.category}`)} · ${t(`labels.tracking.${exercise.trackingType}`)}`}
       left={back}
       right={
         // A predefined exercise is read-only: no menu, which is also how it shows.
@@ -87,14 +98,14 @@ export default function ExerciseDetailScreen() {
           <IconButton
             icon="more_vert"
             color={colors.iconMuted}
-            accessibilityLabel="Exercise menu"
+            accessibilityLabel={t('exercises.exerciseMenu')}
             onPress={() => setMenuOpen(true)}
           />
         )
       }
       footer={
         <BottomActionBar
-          label="Add to Routine"
+          label={t('exercises.addToRoutine')}
           icon="playlist_add"
           onPress={() => router.push(`/add-to-routine?exerciseId=${exercise.id}`)}
         />
@@ -112,7 +123,7 @@ export default function ExerciseDetailScreen() {
         />
       </View>
       {exercise.description === '' ? (
-        <AppText tone="secondary">No description.</AppText>
+        <AppText tone="secondary">{t('exercises.noDescription')}</AppText>
       ) : (
         <AppText>{exercise.description}</AppText>
       )}
@@ -127,10 +138,10 @@ export default function ExerciseDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   media: {
     width: '100%',
     height: size.mediaHero,
     borderRadius: radius.card,
   },
-});
+}));

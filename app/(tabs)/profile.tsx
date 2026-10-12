@@ -18,9 +18,11 @@ import { MonthHeader } from '@/features/history/MonthHeader';
 import { useProfile } from '@/features/profile/hooks';
 import { ProfileCard } from '@/features/profile/ProfileCard';
 import { ProfileStatsCard } from '@/features/profile/ProfileStatsCard';
+import { useLanguage } from '@/features/settings/hooks';
 import { size, spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 /**
@@ -29,10 +31,15 @@ import { StyleSheet, View } from 'react-native';
  * opening the full History.
  */
 export default function ProfileScreen() {
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const router = useRouter();
   const profile = useProfile();
   const items = useHistory();
-  const recent = useMemo(() => groupByMonth(items.slice(0, PROFILE_HISTORY_COUNT)), [items]);
+  const recent = useMemo(
+    () => groupByMonth(items.slice(0, PROFILE_HISTORY_COUNT), locale),
+    [items, locale],
+  );
   const stats = useMemo(() => profileStats(items), [items]);
   // How many sessions the FG% evolution chart shows. Kept here, so it lasts while the app is
   // open (the tab stays mounted) and starts back at 5 on the next launch.
@@ -41,11 +48,11 @@ export default function ProfileScreen() {
 
   return (
     <Screen
-      title="Profile"
+      title={t('profile.title')}
       right={
         <IconButton
           icon="settings"
-          accessibilityLabel="Settings"
+          accessibilityLabel={t('settings.title')}
           onPress={() => router.push('/settings')}
         />
       }
@@ -54,8 +61,8 @@ export default function ProfileScreen() {
       {items.length === 0 ? (
         <EmptyState
           icon="history"
-          title="No workouts yet"
-          message="Finished workouts will show up here, with your stats."
+          title={t('history.emptyTitle')}
+          message={t('history.emptyMessageWithStats')}
         />
       ) : (
         <>
@@ -67,10 +74,14 @@ export default function ProfileScreen() {
           />
           <View style={styles.historyHeader}>
             <AppText variant="headline" accessibilityRole="header">
-              History
+              {t('history.title')}
             </AppText>
             {items.length > PROFILE_HISTORY_COUNT && (
-              <Button variant="ghost" label="See all" onPress={() => router.push('/history')} />
+              <Button
+                variant="ghost"
+                label={t('history.seeAll')}
+                onPress={() => router.push('/history')}
+              />
             )}
           </View>
           {recent.map((section) => (

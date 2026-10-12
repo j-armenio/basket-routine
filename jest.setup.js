@@ -102,10 +102,14 @@ jest.mock('expo-haptics', () => {
   };
 });
 
-// The profile's key-value store (its own SQLite file on the phone) as an in-memory map, emptied
-// through `__clear` between tests.
+// The profile's and the language's key-value store (its own SQLite file on the phone) as an
+// in-memory map, emptied through `__clear` between tests. Starts (and `__clear` restores) with a
+// language already set, so every existing flow test still opens on the tabs, in English; a test
+// that needs the first-launch gate removes `settings.language` itself.
 jest.mock('expo-sqlite/kv-store', () => {
   const items = new Map();
+  const seed = () => items.set('settings.language', 'en');
+  seed();
   const Storage = {
     getItemSync: (key) => items.get(key) ?? null,
     setItemSync: (key, value) => {
@@ -113,5 +117,25 @@ jest.mock('expo-sqlite/kv-store', () => {
     },
     removeItemSync: (key) => items.delete(key),
   };
-  return { __esModule: true, default: Storage, Storage, __clear: () => items.clear() };
+  return {
+    __esModule: true,
+    default: Storage,
+    Storage,
+    __clear: () => {
+      items.clear();
+      seed();
+    },
+  };
 });
+
+// The app asks for the language on every launch; the flow tests skip that picker (the language
+// test turns it back on), so they still open on the tabs.
+jest.mock('@/features/settings/launchGate', () => ({
+  __esModule: true,
+  askLanguageOnLaunch: jest.fn(() => false),
+}));
+
+// Every test renders through `useTranslation()` somewhere, but only `renderRouter('./app')`
+// tests go through the real root layout (the only place that imports this in the app itself).
+// Importing it here instead initializes i18next once per test file, in English, for every test.
+require('./src/i18n/i18n');

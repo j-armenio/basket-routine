@@ -1,16 +1,18 @@
 import { AppText } from '@/components/AppText';
 import type { TargetMode } from '@/domain/types';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { columnRoles, setTable } from './setTable';
 
-const MODE_SUBTITLE = {
-  attempts: 'Fixed attempts · log makes',
-  makes: 'Fixed makes · log attempts',
+const MODE_SUBTITLE_KEY = {
+  attempts: 'workout.modeSubtitleAttempts',
+  makes: 'workout.modeSubtitleMakes',
 } as const;
 
 /** The line under an exercise's name: what its mode fixes, and what the user logs. */
-export function modeSubtitle(targetMode: TargetMode | null): string {
-  return targetMode ? MODE_SUBTITLE[targetMode] : 'Check when done';
+export function modeSubtitle(t: TFunction, targetMode: TargetMode | null): string {
+  return t(targetMode ? MODE_SUBTITLE_KEY[targetMode] : 'workout.modeSubtitleCheck');
 }
 
 type SetTableHeaderProps = {
@@ -31,9 +33,10 @@ export function SetTableHeader({
   hideLogged = false,
   readOnly = false,
 }: SetTableHeaderProps) {
+  const { t } = useTranslation();
   const numberColumn = (
     <View style={setTable.numberColumn}>
-      <HeaderLabel>SET</HeaderLabel>
+      <HeaderLabel>{t('workout.columnSet')}</HeaderLabel>
     </View>
   );
 
@@ -43,7 +46,7 @@ export function SetTableHeader({
         {numberColumn}
         {!hideLogged && (
           <View style={setTable.doneColumn}>
-            <HeaderLabel>DONE</HeaderLabel>
+            <HeaderLabel>{t('workout.columnDone')}</HeaderLabel>
           </View>
         )}
       </View>
@@ -55,7 +58,9 @@ export function SetTableHeader({
       <View style={setTable.row}>
         {numberColumn}
         <View style={setTable.loggedColumn}>
-          <HeaderLabel>{targetMode === 'attempts' ? 'ATTEMPTS' : 'MAKES'}</HeaderLabel>
+          <HeaderLabel>
+            {t(targetMode === 'attempts' ? 'workout.columnAttempts' : 'workout.columnMakes')}
+          </HeaderLabel>
         </View>
       </View>
     );
@@ -72,13 +77,13 @@ export function SetTableHeader({
     <View style={setTable.row}>
       {numberColumn}
       <View style={column(roles.makes)}>
-        <HeaderLabel>MAKES</HeaderLabel>
+        <HeaderLabel>{t('workout.columnMakes')}</HeaderLabel>
       </View>
       <View style={column(roles.attempts)}>
-        <HeaderLabel>ATTEMPTS</HeaderLabel>
+        <HeaderLabel>{t('workout.columnAttempts')}</HeaderLabel>
       </View>
       <View style={setTable.fgColumn}>
-        <HeaderLabel>FG%</HeaderLabel>
+        <HeaderLabel>{t('workout.columnFgPct')}</HeaderLabel>
       </View>
     </View>
   );

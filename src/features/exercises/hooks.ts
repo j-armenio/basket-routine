@@ -3,6 +3,7 @@ import { getExercise, listExercises, type ExerciseFilter } from '@/db/repositori
 import { listExerciseResults } from '@/db/repositories/sessions';
 import { exerciseStats } from '@/domain/exerciseStats';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDataVersion } from '../dataStore';
 import { categoryCards, groupByCategory } from './catalogList';
 
@@ -11,20 +12,24 @@ import { categoryCards, groupByCategory } from './catalogList';
 
 /** The active exercises matching the filter, grouped by category, for the Exercises tab and the picker. */
 export function useExercises({ search, category, customOnly }: ExerciseFilter = {}) {
+  const { t, i18n } = useTranslation();
   const version = useDataVersion();
   return useMemo(() => {
     void version; // re-read after any write
-    return groupByCategory(listExercises(db, { search, category, customOnly }));
-  }, [version, search, category, customOnly]);
+    return groupByCategory(t, listExercises(db, { search, category, customOnly }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version, search, category, customOnly, i18n.language]);
 }
 
 /** The Exercises tab's cards (the categories and Custom), with how many active exercises each opens. */
 export function useCategoryCards() {
+  const { t, i18n } = useTranslation();
   const version = useDataVersion();
   return useMemo(() => {
     void version; // re-read after any write
-    return categoryCards(listExercises(db));
-  }, [version]);
+    return categoryCards(t, listExercises(db));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [version, i18n.language]);
 }
 
 /** How many active exercises the whole catalog has, whatever the filter. */

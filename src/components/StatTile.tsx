@@ -1,7 +1,7 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { radius, spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { AppText, type TextTone } from './AppText';
 
 type StatTileProps = {
@@ -16,6 +16,7 @@ type StatTileProps = {
 
 /** A labeled number inside a card (BEST FG%, SESSIONS…). Tiles in a row share its width. */
 export function StatTile({ label, value, tone = 'default', large = false, testID }: StatTileProps) {
+  const styles = useStyles();
   return (
     <View style={styles.tile}>
       <AppText variant="label" tone="secondary">
@@ -36,7 +37,7 @@ export function StatTile({ label, value, tone = 'default', large = false, testID
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   tile: {
     flex: 1,
     gap: spacing.xxs,
@@ -44,4 +45,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.input,
     backgroundColor: colors.surfaceRaised,
   },
-});
+}));

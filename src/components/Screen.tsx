@@ -1,8 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { size, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from './AppText';
 import { useKeyboardVisible } from './useKeyboardVisible';
@@ -54,6 +54,7 @@ export function Screen({
   footer,
   children,
 }: ScreenProps) {
+  const styles = useStyles();
   const keyboardVisible = useKeyboardVisible();
   const body = scroll ? (
     <ScrollView
@@ -69,6 +70,7 @@ export function Screen({
 
   return (
     <SafeAreaView
+      testID="screen"
       edges={bottomInset && !footer ? ['top', 'bottom'] : ['top']}
       style={styles.safeArea}
     >
@@ -121,7 +123,7 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -165,4 +167,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screenPadding,
     gap: spacing.mdPlus,
   },
-});
+}));

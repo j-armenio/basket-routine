@@ -19,11 +19,23 @@ import {
 } from '@/db/repositories/sessions';
 import { archivedExerciseIds } from '@/db/repositories/exercises';
 import { getWorkout, getWorkoutWithExercises } from '@/db/repositories/workouts';
-import { defaultWorkoutName } from '@/domain/defaults';
+import { timeOfDay } from '@/domain/defaults';
 import type { TacticalBoard } from '@/domain/tacticalBoard';
 import { sameStructure, structureFromSession, structureFromTemplate } from '@/domain/template';
 import type { TargetMode } from '@/domain/types';
+import i18n from '@/i18n/i18n';
 import { run } from '../dataStore';
+
+const WORKOUT_NAME_KEY = {
+  morning: 'workout.morningWorkoutName',
+  afternoon: 'workout.afternoonWorkoutName',
+  evening: 'workout.eveningWorkoutName',
+} as const;
+
+/** The empty workout's name, in the language active right now: it's saved as a session snapshot. */
+function defaultWorkoutName(date: Date): string {
+  return i18n.t(WORKOUT_NAME_KEY[timeOfDay(date)]);
+}
 
 export function startEmptyWorkout() {
   return run(() => startEmptySession(db, defaultWorkoutName(new Date())));

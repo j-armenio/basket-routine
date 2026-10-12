@@ -8,6 +8,7 @@ import { useCategoryCards, useExerciseCount, useExercises } from '@/features/exe
 import { spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet } from 'react-native';
 
 /**
@@ -15,6 +16,7 @@ import { ScrollView, StyleSheet } from 'react-native';
  * list. Typing in the search swaps the cards for the matching exercises of every category.
  */
 export default function ExercisesScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [search, setSearch] = useState('');
   const searching = search.trim() !== '';
@@ -25,14 +27,14 @@ export default function ExercisesScreen() {
 
   return (
     <Screen
-      title="Exercises"
-      subtitle={exerciseCount(count)}
+      title={t('exercises.title')}
+      subtitle={exerciseCount(t, count)}
       // Rarely needed, so a plain button up here rather than a FAB.
       right={
         <IconButton
           icon="add"
           variant="outlined"
-          accessibilityLabel="New exercise"
+          accessibilityLabel={t('addExercise.newExerciseA11y')}
           onPress={() => router.push('/edit-exercise')}
         />
       }
@@ -40,8 +42,8 @@ export default function ExercisesScreen() {
     >
       <TextField
         icon="search"
-        accessibilityLabel="Search exercises"
-        placeholder="Search exercises"
+        accessibilityLabel={t('common.searchExercises')}
+        placeholder={t('common.searchExercises')}
         value={search}
         onChangeText={setSearch}
         autoCorrect={false}

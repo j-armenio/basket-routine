@@ -312,19 +312,11 @@ export function sameBoard(a: TacticalBoard | null, b: TacticalBoard | null): boo
   return sameElements(a.elements, b.elements);
 }
 
-const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
-
-/** For screen readers: "Tactical board: 3 X marks, 2 arrows, 1 line". */
-export function describeBoard(board: TacticalBoard): string {
+/** How many of each mark a board holds. `src/features/tacticalBoard/boardDescription.ts` writes the words for screen readers. */
+export function boardElementCounts(board: TacticalBoard): Record<BoardElement['type'], number> {
   const count = (type: BoardElement['type']) =>
     board.elements.filter((element) => element.type === type).length;
-  const parts = [
-    [count('x'), 'X mark', 'X marks'],
-    [count('arrow'), 'arrow', 'arrows'],
-    [count('pen'), 'line', 'lines'],
-  ] as const;
-  const shown = parts.filter(([n]) => n > 0).map(([n, one, many]) => plural(n, one, many));
-  return shown.length === 0 ? 'Empty tactical board' : `Tactical board: ${shown.join(', ')}`;
+  return { x: count('x'), arrow: count('arrow'), pen: count('pen') };
 }
 
 const OK: ValidationResult = { ok: true };

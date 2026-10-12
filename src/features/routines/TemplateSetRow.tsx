@@ -2,10 +2,10 @@ import { AppText } from '@/components/AppText';
 import { NumberInput } from '@/components/NumberInput';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import type { DomainErrorReason } from '@/domain/errors';
-import { reasonMessage } from '@/domain/messages';
 import type { TargetMode } from '@/domain/types';
 import { spacing } from '@/theme/spacing';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SetNumber } from '../workout/SetNumber';
 import { setTable } from '../workout/setTable';
@@ -25,12 +25,13 @@ type TemplateSetRowProps = {
 };
 
 export function TemplateSetRow(props: TemplateSetRowProps) {
+  const { t } = useTranslation();
   const { exerciseKey, set, number, targetMode, deletable } = props;
   return (
     <SwipeToDelete
       testID={`set-${number}`}
       enabled={deletable}
-      deleteLabel={`Delete set ${number}`}
+      deleteLabel={t('workout.deleteSet', { number })}
       onDelete={() => {
         // a draft edit can't fail
         updateDraft((draft) => deleteSet(draft, exerciseKey, set.key));
@@ -54,6 +55,7 @@ function TargetRow({
   number,
   targetMode,
 }: TemplateSetRowProps & { targetMode: TargetMode }) {
+  const { t } = useTranslation();
   const [rejection, setRejection] = useState<DomainErrorReason | null>(null);
   const target = useNumberCell({
     exercise: { targetMode },
@@ -73,7 +75,10 @@ function TargetRow({
         <SetNumber number={number} />
         <View style={setTable.loggedColumn}>
           <NumberInput
-            accessibilityLabel={`Set ${number} ${targetMode}`}
+            accessibilityLabel={t(
+              targetMode === 'attempts' ? 'workout.setAttemptsLabel' : 'workout.setMakesLabel',
+              { number },
+            )}
             value={target.text}
             onFocus={target.onFocus}
             onChangeText={target.onChangeText}
@@ -84,7 +89,7 @@ function TargetRow({
       </View>
       {rejection && (
         <AppText variant="caption" tone="error" style={styles.error} accessibilityRole="alert">
-          {reasonMessage(rejection)}
+          {t(`errors.${rejection}`)}
         </AppText>
       )}
     </View>

@@ -2,7 +2,7 @@ import {
   arrowControlPoint,
   arrowHead,
   arrowMidpoint,
-  describeBoard,
+  boardElementCounts,
   distanceM,
   distanceToElementM,
   emptyBoard,
@@ -347,11 +347,11 @@ describe('sameBoard', () => {
   });
 });
 
-describe('describeBoard', () => {
-  test('counts each kind, in the singular or the plural', () => {
-    expect(describeBoard(emptyBoard())).toBe('Empty tactical board');
+describe('boardElementCounts', () => {
+  test('counts each kind', () => {
+    expect(boardElementCounts(emptyBoard())).toEqual({ x: 0, arrow: 0, pen: 0 });
     expect(
-      describeBoard(
+      boardElementCounts(
         board([
           { type: 'x', at: [0.1, 0.1] },
           { type: 'x', at: [0.2, 0.1] },
@@ -365,6 +365,6 @@ describe('describeBoard', () => {
           },
         ]),
       ),
-    ).toBe('Tactical board: 2 X marks, 1 arrow, 1 line');
+    ).toEqual({ x: 2, arrow: 1, pen: 1 });
   });
 });

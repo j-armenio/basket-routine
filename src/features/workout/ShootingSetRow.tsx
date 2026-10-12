@@ -5,11 +5,11 @@ import { SwipeToDelete } from '@/components/SwipeToDelete';
 import type { DomainErrorReason } from '@/domain/errors';
 import { fgBand, setFgPct } from '@/domain/fg';
 import { formatFgPct } from '@/domain/format';
-import { reasonMessage } from '@/domain/messages';
 import type { TargetMode } from '@/domain/types';
 import { spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { deleteSet, updateSet } from './actions';
 import type { SessionSetDetail } from './hooks';
@@ -30,11 +30,16 @@ type ShootingSetRowProps = {
 type Rejection = { field: SetField; reason: DomainErrorReason };
 
 export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingSetRowProps) {
+  const { t } = useTranslation();
   const [rejection, setRejection] = useState<Rejection | null>(null);
   const exercise = { targetMode };
   // The target is what the mode fixes (attempts or makes), the logged value the other one.
-  const targetName = targetMode;
-  const loggedName = targetMode === 'attempts' ? 'makes' : 'attempts';
+  const fieldLabelKey = (field: 'attempts' | 'makes') =>
+    field === 'attempts' ? 'workout.setAttemptsLabel' : 'workout.setMakesLabel';
+  const targetLabel = t(fieldLabelKey(targetMode), { number });
+  const loggedLabel = t(fieldLabelKey(targetMode === 'attempts' ? 'makes' : 'attempts'), {
+    number,
+  });
 
   const cell = (field: SetField) => ({
     exercise,
@@ -56,7 +61,7 @@ export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingS
     targetValue: (
       <NumberInput
         size="compact"
-        accessibilityLabel={`Set ${number} ${targetName}`}
+        accessibilityLabel={targetLabel}
         value={target.text}
         onFocus={target.onFocus}
         onChangeText={target.onChangeText}
@@ -66,7 +71,7 @@ export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingS
     ),
     loggedValue: (
       <NumberInput
-        accessibilityLabel={`Set ${number} ${loggedName}`}
+        accessibilityLabel={loggedLabel}
         value={logged.text}
         onFocus={logged.onFocus}
         onChangeText={logged.onChangeText}
@@ -86,7 +91,7 @@ export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingS
     <SwipeToDelete
       testID={`set-${number}`}
       enabled={deletable}
-      deleteLabel={`Delete set ${number}`}
+      deleteLabel={t('workout.deleteSet', { number })}
       onDelete={() => deleteSet(set.id).ok}
     >
       <View style={styles.container}>
@@ -100,7 +105,7 @@ export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingS
               weight="bold"
               tone={fgTone(fgBand(fg))}
               style={tabularNums}
-              accessibilityLabel={`Set ${number} FG%`}
+              accessibilityLabel={t('workout.setFgLabel', { number })}
             >
               {formatFgPct(fg)}
             </AppText>
@@ -108,7 +113,7 @@ export function ShootingSetRow({ set, number, targetMode, deletable }: ShootingS
         </View>
         {rejection && (
           <AppText variant="caption" tone="error" style={styles.error} accessibilityRole="alert">
-            {reasonMessage(rejection.reason)}
+            {t(`errors.${rejection.reason}`)}
           </AppText>
         )}
       </View>

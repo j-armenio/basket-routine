@@ -1,6 +1,7 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, opacity, radius, size, spacing } from '@/theme/spacing';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -28,6 +29,8 @@ export function ChipRow<T extends string>({
   disabled,
   wrap = false,
 }: ChipRowProps<T>) {
+  const styles = useStyles();
+  const colors = useColors();
   const chips = options.map((option) => {
     const selected = option.value === value;
     return (
@@ -86,7 +89,7 @@ export function ChipRow<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   // A horizontal ScrollView grows by default, which would push the list below it away. It runs to
   // the screen's edges, so the chips scroll under them.
   row: {
@@ -124,4 +127,4 @@ const styles = StyleSheet.create({
   dimmed: {
     opacity: opacity.disabled,
   },
-});
+}));

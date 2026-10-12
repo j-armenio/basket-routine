@@ -1,9 +1,12 @@
 import { Icon } from '@/components/Icon';
-import { describeBoard, type TacticalBoard } from '@/domain/tacticalBoard';
-import { colors } from '@/theme/colors';
+import type { TacticalBoard } from '@/domain/tacticalBoard';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, opacity, radius, size, spacing } from '@/theme/spacing';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, View } from 'react-native';
+import { describeBoard } from './boardDescription';
 import { CourtBoard } from './CourtBoard';
 import { COURT_ASPECT } from './courtGeometry';
 
@@ -35,6 +38,9 @@ export function TacticalBoardSlot({
   onOpen,
   variant = 'card',
 }: TacticalBoardSlotProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const [width, setWidth] = useState(0);
 
   if (!board) return null;
@@ -43,8 +49,8 @@ export function TacticalBoardSlot({
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Open tactical board for ${exerciseName}`}
-        accessibilityHint={describeBoard(board)}
+        accessibilityLabel={t('tactical.openFor', { name: exerciseName })}
+        accessibilityHint={describeBoard(t, board)}
         onPress={onOpen}
         style={({ pressed }) => [styles.iconTouch, pressed && styles.pressed]}
       >
@@ -66,7 +72,7 @@ export function TacticalBoardSlot({
 
   if (!onOpen) {
     return (
-      <View accessible accessibilityRole="image" accessibilityLabel={describeBoard(board)}>
+      <View accessible accessibilityRole="image" accessibilityLabel={describeBoard(t, board)}>
         {drawing}
       </View>
     );
@@ -74,8 +80,8 @@ export function TacticalBoardSlot({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Open tactical board for ${exerciseName}`}
-      accessibilityHint={describeBoard(board)}
+      accessibilityLabel={t('tactical.openFor', { name: exerciseName })}
+      accessibilityHint={describeBoard(t, board)}
       onPress={onOpen}
       style={({ pressed }) => pressed && styles.pressed}
     >
@@ -87,7 +93,7 @@ export function TacticalBoardSlot({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   frame: {
     aspectRatio: COURT_ASPECT,
     borderRadius: radius.courtThumbnail,
@@ -120,4 +126,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: opacity.pressed,
   },
-});
+}));

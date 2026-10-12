@@ -1,4 +1,4 @@
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { render, screen } from '@testing-library/react-native';
 import { SessionExerciseView } from './SessionExerciseView';
 import type { SessionExerciseDetail } from '../workout/hooks';

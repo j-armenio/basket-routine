@@ -6,10 +6,12 @@ import type { ExerciseSessionResult } from '@/domain/exerciseStats';
 import { fgBand } from '@/domain/fg';
 import { formatDayDate, formatFgPct } from '@/domain/format';
 import type { TrackingType } from '@/domain/types';
-import { colors } from '@/theme/colors';
+import { useLanguage } from '@/features/settings/hooks';
+import { makeStyles } from '@/theme/makeStyles';
 import { border, size, spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
-import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 import { useExerciseStats } from './hooks';
 
 /**
@@ -24,17 +26,19 @@ export function ExerciseStatsCard({
   exerciseId: number;
   trackingType: TrackingType;
 }) {
+  const styles = useStyles();
+  const { t } = useTranslation();
   const stats = useExerciseStats(exerciseId);
   const shooting = trackingType === 'makes_attempts';
 
   return (
     <Card style={styles.card}>
       <AppText variant="sectionTitle" accessibilityRole="header">
-        Your stats
+        {t('exercises.yourStats')}
       </AppText>
       {stats.sessions === 0 ? (
         <AppText variant="bodySmall" tone="secondary">
-          No sessions yet.
+          {t('exercises.noSessionsYet')}
         </AppText>
       ) : (
         <>
@@ -42,24 +46,27 @@ export function ExerciseStatsCard({
             {shooting ? (
               <>
                 <StatTile
-                  label="Best FG%"
+                  label={t('exercises.bestFgPct')}
                   value={formatFgPct(stats.best)}
                   tone={fgTone(fgBand(stats.best))}
                 />
                 <StatTile
-                  label="Average"
+                  label={t('exercises.average')}
                   value={formatFgPct(stats.shooting.fgPct)}
                   tone={fgTone(fgBand(stats.shooting.fgPct))}
                 />
               </>
             ) : (
-              <StatTile label="Done" value={`${stats.check.completed} / ${stats.check.total}`} />
+              <StatTile
+                label={t('exercises.done')}
+                value={`${stats.check.completed} / ${stats.check.total}`}
+              />
             )}
-            <StatTile label="Sessions" value={String(stats.sessions)} />
+            <StatTile label={t('exercises.sessions')} value={String(stats.sessions)} />
           </View>
           <View>
             <AppText variant="sectionHeader" tone="secondary" style={styles.recentTitle}>
-              Recent sessions
+              {t('exercises.recentSessions')}
             </AppText>
             {stats.recent.map((result, index) => (
               <RecentRow
@@ -85,11 +92,14 @@ function RecentRow({
   shooting: boolean;
   last: boolean;
 }) {
+  const styles = useStyles();
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const logged = result.shooting.attempts > 0;
   return (
     <View style={[styles.row, !last && styles.divider]}>
       <AppText variant="bodySmall" style={styles.date}>
-        {formatDayDate(result.startedAt)}
+        {formatDayDate(result.startedAt, locale)}
       </AppText>
       {shooting ? (
         <>
@@ -107,14 +117,17 @@ function RecentRow({
         </>
       ) : (
         <AppText variant="bodySmall" tone="secondary" style={tabularNums}>
-          {`${result.check.completed} / ${result.check.total} done`}
+          {t('history.checksLabel', {
+            completed: result.check.completed,
+            total: result.check.total,
+          })}
         </AppText>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     gap: spacing.lg,
   },
@@ -142,4 +155,4 @@ const styles = StyleSheet.create({
     width: size.setFgColumn,
     textAlign: 'right',
   },
-});
+}));

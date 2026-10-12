@@ -1,10 +1,11 @@
 import { AppText } from '@/components/AppText';
 import { EmptyState } from '@/components/EmptyState';
 import type { Exercise } from '@/db/types';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { SectionList, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { SectionList, View } from 'react-native';
 import type { CategorySection } from './catalogList';
 import { ExerciseRow } from './ExerciseRow';
 
@@ -28,10 +29,13 @@ export function ExerciseList({
   sections,
   onPressExercise,
   rightIcon,
-  empty = { title: 'No exercises found' },
+  empty,
   bottomClearance = 0,
   sectionHeaders = true,
 }: ExerciseListProps) {
+  const styles = useStyles();
+  const { t } = useTranslation();
+  const emptyState = empty ?? { title: t('exercises.noExercisesFound') };
   return (
     <SectionList
       style={styles.list}
@@ -41,29 +45,39 @@ export function ExerciseList({
       keyboardShouldPersistTaps="handled"
       stickySectionHeadersEnabled={false}
       ItemSeparatorComponent={Separator}
-      renderSectionHeader={sectionHeaders ? SectionHeader : undefined}
+      renderSectionHeader={
+        sectionHeaders ? ({ section }) => <SectionHeader section={section} /> : undefined
+      }
       renderItem={({ item }) => (
         <ExerciseRow exercise={item} rightIcon={rightIcon} onPress={() => onPressExercise(item)} />
       )}
-      ListEmptyComponent={<EmptyState icon="search" title={empty.title} message={empty.message} />}
+      ListEmptyComponent={
+        <EmptyState icon="search" title={emptyState.title} message={emptyState.message} />
+      }
     />
   );
 }
 
-const Separator = () => <View style={styles.separator} />;
+function Separator() {
+  const styles = useStyles();
+  return <View style={styles.separator} />;
+}
 
-const SectionHeader = ({ section }: { section: { title: string } }) => (
-  <AppText
-    variant="sectionHeader"
-    tone="secondary"
-    accessibilityRole="header"
-    style={styles.sectionHeader}
-  >
-    {section.title}
-  </AppText>
-);
+function SectionHeader({ section }: { section: { title: string } }) {
+  const styles = useStyles();
+  return (
+    <AppText
+      variant="sectionHeader"
+      tone="secondary"
+      accessibilityRole="header"
+      style={styles.sectionHeader}
+    >
+      {section.title}
+    </AppText>
+  );
+}
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   list: {
     flex: 1,
     marginHorizontal: -spacing.screenPadding,
@@ -77,4 +91,4 @@ const styles = StyleSheet.create({
   separator: {
     height: spacing.xsPlus,
   },
-});
+}));

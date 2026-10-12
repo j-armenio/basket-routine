@@ -5,16 +5,21 @@ import { EmptyState } from '@/components/EmptyState';
 import { fgTone } from '@/components/fgTone';
 import { Screen } from '@/components/Screen';
 import { fgBand } from '@/domain/fg';
-import { formatDuration, formatFgPct, formatWorkoutDate } from '@/domain/format';
+import { formatFgPct, formatWorkoutDate } from '@/domain/format';
 import { summarizeExercise, summarizeSession } from '@/domain/summary';
 import { SessionTotals } from '@/features/history/SessionTotals';
+import { useLanguage } from '@/features/settings/hooks';
 import { useSessionDetail } from '@/features/workout/hooks';
+import { formatDuration } from '@/i18n/format';
 import { spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 export default function WorkoutSummaryScreen() {
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = useSessionDetail(Number(id));
@@ -22,12 +27,12 @@ export default function WorkoutSummaryScreen() {
 
   if (!detail || detail.status !== 'finished') {
     return (
-      <Screen title="Summary" bottomInset>
+      <Screen title={t('workoutSummary.title')} bottomInset>
         <EmptyState
           icon="history"
-          title="Workout not found"
-          message="This workout doesn't exist or isn't finished."
-          action={{ label: 'Back to Workout', onPress: done }}
+          title={t('workoutSummary.notFoundTitle')}
+          message={t('workoutSummary.notFoundMessage')}
+          action={{ label: t('common.backToWorkout'), onPress: done }}
         />
       </Screen>
     );
@@ -39,15 +44,15 @@ export default function WorkoutSummaryScreen() {
   return (
     <Screen
       title={detail.name}
-      subtitle={`${formatWorkoutDate(detail.startedAt)} · ${formatDuration(duration)}`}
+      subtitle={`${formatWorkoutDate(detail.startedAt, locale)} · ${formatDuration(t, duration)}`}
       bottomInset
     >
       <SessionTotals summary={summary} />
       <Card style={styles.exercises}>
-        <AppText variant="sectionTitle">Exercises</AppText>
+        <AppText variant="sectionTitle">{t('workoutSummary.exercises')}</AppText>
         {detail.exercises.length === 0 && (
           <AppText variant="bodySmall" tone="secondary">
-            No exercises.
+            {t('workoutSummary.noExercises')}
           </AppText>
         )}
         {detail.exercises.map((exercise) => {
@@ -59,7 +64,10 @@ export default function WorkoutSummaryScreen() {
               </AppText>
               <AppText variant="bodySmall" tone="secondary" style={tabularNums}>
                 {result.trackingType === 'check' ? (
-                  `${result.completed} / ${result.total} done`
+                  t('workoutSummary.doneLabel', {
+                    completed: result.completed,
+                    total: result.total,
+                  })
                 ) : result.attempts > 0 ? (
                   <>
                     {`${result.makes} / ${result.attempts} · `}
@@ -76,7 +84,7 @@ export default function WorkoutSummaryScreen() {
         })}
       </Card>
       <View style={styles.done}>
-        <Button label="Done" fullWidth onPress={done} />
+        <Button label={t('workoutSummary.done')} fullWidth onPress={done} />
       </View>
     </Screen>
   );

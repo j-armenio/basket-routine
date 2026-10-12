@@ -1,13 +1,13 @@
 import {
+  durationParts,
   formatDayDate,
   formatElapsed,
-  formatDuration,
-  formatExerciseList,
   formatFgPct,
   formatMonth,
   formatShortDate,
   formatWorkoutDate,
   parseCount,
+  splitExerciseList,
 } from './format';
 
 describe('formatFgPct', () => {
@@ -47,50 +47,54 @@ describe('parseCount', () => {
   );
 });
 
-describe('formatDuration', () => {
+describe('durationParts', () => {
   const min = 60_000;
 
   test.each([
-    [0, '< 1 min'],
-    [29_000, '< 1 min'],
-    [59_999, '< 1 min'],
-    [min, '1 min'],
-    [min + 29_000, '1 min'],
-    [42 * min, '42 min'],
-    [59 * min + 40_000, '1 h 00 min'],
-    [60 * min, '1 h 00 min'],
-    [65 * min, '1 h 05 min'],
-    [135 * min, '2 h 15 min'],
-    [-5 * min, '< 1 min'],
-  ])('%s ms -> %s', (ms, expected) => {
-    expect(formatDuration(ms)).toBe(expected);
+    [0, { kind: 'under_minute' }],
+    [29_000, { kind: 'under_minute' }],
+    [59_999, { kind: 'under_minute' }],
+    [min, { kind: 'minutes', minutes: 1 }],
+    [min + 29_000, { kind: 'minutes', minutes: 1 }],
+    [42 * min, { kind: 'minutes', minutes: 42 }],
+    [59 * min + 40_000, { kind: 'hours_minutes', hours: 1, minutes: 0 }],
+    [60 * min, { kind: 'hours_minutes', hours: 1, minutes: 0 }],
+    [65 * min, { kind: 'hours_minutes', hours: 1, minutes: 5 }],
+    [135 * min, { kind: 'hours_minutes', hours: 2, minutes: 15 }],
+    [-5 * min, { kind: 'under_minute' }],
+  ])('%s ms -> %o', (ms, expected) => {
+    expect(durationParts(ms)).toEqual(expected);
   });
 });
 
-test('formatWorkoutDate uses the local date, in English', () => {
-  expect(formatWorkoutDate(new Date(2026, 8, 24, 23, 30))).toBe('Thu, Sep 24, 2026');
+test('formatWorkoutDate uses the local date, in the given locale', () => {
+  expect(formatWorkoutDate(new Date(2026, 8, 24, 23, 30), 'en-US')).toBe('Thu, Sep 24, 2026');
 });
 
-test('formatMonth uses the local month and year, in English', () => {
-  expect(formatMonth(new Date(2026, 8, 24, 23, 30))).toBe('September 2026');
-  expect(formatMonth(new Date(2027, 0, 1, 0, 5))).toBe('January 2027');
+test('formatMonth uses the local month and year, in the given locale', () => {
+  expect(formatMonth(new Date(2026, 8, 24, 23, 30), 'en-US')).toBe('September 2026');
+  expect(formatMonth(new Date(2027, 0, 1, 0, 5), 'en-US')).toBe('January 2027');
 });
 
-describe('formatExerciseList', () => {
+describe('splitExerciseList', () => {
   test('lists every name up to the limit', () => {
-    expect(formatExerciseList(['Free Throws'])).toBe('Free Throws');
-    expect(formatExerciseList(['Free Throws', 'Mikan Drill', 'Layups'])).toBe(
-      'Free Throws, Mikan Drill, Layups',
-    );
+    expect(splitExerciseList(['Free Throws'])).toEqual({ shown: ['Free Throws'], moreCount: 0 });
+    expect(splitExerciseList(['Free Throws', 'Mikan Drill', 'Layups'])).toEqual({
+      shown: ['Free Throws', 'Mikan Drill', 'Layups'],
+      moreCount: 0,
+    });
   });
 
   test('counts the ones left out', () => {
-    expect(formatExerciseList(['A', 'B', 'C', 'D', 'E'])).toBe('A, B, C +2 more');
-    expect(formatExerciseList(['A', 'B', 'C'], 2)).toBe('A, B +1 more');
+    expect(splitExerciseList(['A', 'B', 'C', 'D', 'E'])).toEqual({
+      shown: ['A', 'B', 'C'],
+      moreCount: 2,
+    });
+    expect(splitExerciseList(['A', 'B', 'C'], 2)).toEqual({ shown: ['A', 'B'], moreCount: 1 });
   });
 
   test('says so when there is nothing', () => {
-    expect(formatExerciseList([])).toBe('No exercises');
+    expect(splitExerciseList([])).toEqual({ shown: [], moreCount: 0 });
   });
 });
 
@@ -110,8 +114,8 @@ describe('formatElapsed', () => {
   });
 });
 
-test('formatShortDate and formatDayDate use the local date, in English', () => {
+test('formatShortDate and formatDayDate use the local date, in the given locale', () => {
   const date = new Date(2026, 8, 28, 23, 30);
-  expect(formatShortDate(date)).toBe('Sep 28');
-  expect(formatDayDate(date)).toBe('Mon, Sep 28');
+  expect(formatShortDate(date, 'en-US')).toBe('Sep 28');
+  expect(formatDayDate(date, 'en-US')).toBe('Mon, Sep 28');
 });

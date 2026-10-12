@@ -1,4 +1,4 @@
-import { colors } from './colors';
+import { darkColors, lightColors, type ColorToken, type Palette } from './colors';
 
 function channel(hex: string, start: number) {
   const value = parseInt(hex.slice(start, start + 2), 16) / 255;
@@ -14,7 +14,7 @@ function contrast(foreground: string, background: string) {
   return (light + 0.05) / (dark + 0.05);
 }
 
-type Token = keyof typeof colors;
+type Token = ColorToken;
 
 // Every text-on-background pair the design uses. Outlines and the empty check box's border are
 // non-text (3:1), and the scrim isn't a color text sits on.
@@ -36,19 +36,37 @@ const readablePairs: [Token, Token][] = [
   ['onSecondary', 'secondary'],
 ];
 
-test.each(readablePairs)('%s on %s has at least 4.5:1 contrast', (foreground, background) => {
-  expect(contrast(colors[foreground], colors[background])).toBeGreaterThanOrEqual(4.5);
-});
-
 // The tactical board's marks and lines are graphics (3:1) on the court's floor and paint.
 const boardPairs: [Token, Token][] = (['court', 'courtPaint', 'courtArc'] as const).flatMap(
   (floor): [Token, Token][] => [
-    ['textPrimary', floor],
-    ['primary', floor],
+    ['boardMark', floor],
+    ['boardPen', floor],
     ['courtLine', floor],
   ],
 );
 
-test.each(boardPairs)('%s on %s has at least 3:1 contrast', (foreground, background) => {
-  expect(contrast(colors[foreground], colors[background])).toBeGreaterThanOrEqual(3);
+const palettes: [string, Palette][] = [
+  ['dark', darkColors],
+  ['light', lightColors],
+];
+
+describe.each(palettes)('%s palette', (_name, colors) => {
+  test.each(readablePairs)('%s on %s has at least 4.5:1 contrast', (foreground, background) => {
+    expect(contrast(colors[foreground], colors[background])).toBeGreaterThanOrEqual(4.5);
+  });
+
+  test.each(boardPairs)('%s on %s has at least 3:1 contrast', (foreground, background) => {
+    expect(contrast(colors[foreground], colors[background])).toBeGreaterThanOrEqual(3);
+  });
+
+  test('the empty check box border has at least 3:1 contrast on surface', () => {
+    expect(contrast(colors.outlineStrong, colors.surface)).toBeGreaterThanOrEqual(3);
+  });
+});
+
+test('the tactical board looks the same in both palettes', () => {
+  const boardTokens = Object.keys(darkColors).filter(
+    (token) => token.startsWith('court') || token.startsWith('board'),
+  ) as Token[];
+  for (const token of boardTokens) expect(lightColors[token]).toBe(darkColors[token]);
 });

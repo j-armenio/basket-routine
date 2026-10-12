@@ -3,7 +3,6 @@ import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import type { Exercise } from '@/db/types';
-import { reasonMessage } from '@/domain/messages';
 import type { TargetMode } from '@/domain/types';
 import { ExerciseList } from '@/features/exercises/ExerciseList';
 import { useExercises } from '@/features/exercises/hooks';
@@ -14,9 +13,11 @@ import { useInProgressSession } from '@/features/workout/hooks';
 import { TargetModeSheet } from '@/features/workout/TargetModeSheet';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 
 export default function AddExerciseScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   // `?to=template` adds to the template being edited instead of the session in progress.
   const { to } = useLocalSearchParams<{ to?: string }>();
@@ -42,7 +43,7 @@ export default function AddExerciseScreen() {
     if (!session) return;
     const result = addExercise(session.id, exercise.id, targetMode);
     if (result.ok) router.back();
-    else Alert.alert("Couldn't add exercise", reasonMessage(result.reason));
+    else Alert.alert(t('addExercise.addFailedTitle'), t(`errors.${result.reason}`));
   };
 
   const pick = (exercise: Exercise) => {
@@ -52,16 +53,22 @@ export default function AddExerciseScreen() {
 
   return (
     <Screen
-      title="Add Exercise"
+      title={t('addExercise.title')}
       titleVariant="title"
       scroll={false}
       bottomInset
-      left={<IconButton icon="close" accessibilityLabel="Close" onPress={() => router.back()} />}
+      left={
+        <IconButton
+          icon="close"
+          accessibilityLabel={t('common.close')}
+          onPress={() => router.back()}
+        />
+      }
     >
       <TextField
         icon="search"
-        accessibilityLabel="Search exercises"
-        placeholder="Search exercises"
+        accessibilityLabel={t('common.searchExercises')}
+        placeholder={t('common.searchExercises')}
         value={search}
         onChangeText={setSearch}
         autoCorrect={false}
@@ -74,9 +81,9 @@ export default function AddExerciseScreen() {
         onPressExercise={pick}
       />
       <Fab
-        label="New Exercise"
+        label={t('addExercise.newExerciseLabel')}
         icon="add"
-        accessibilityLabel="New exercise"
+        accessibilityLabel={t('addExercise.newExerciseA11y')}
         onPress={() => router.push('/edit-exercise')}
       />
       <TargetModeSheet

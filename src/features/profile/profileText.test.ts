@@ -1,10 +1,13 @@
+import i18n from '@/i18n/i18n';
 import { displayName, initialOf, workoutsLogged } from './profileText';
+
+const { t } = i18n;
 
 describe('displayName', () => {
   test('is the name, or "Player" when it is blank', () => {
-    expect(displayName('João')).toBe('João');
-    expect(displayName('')).toBe('Player');
-    expect(displayName('   ')).toBe('Player');
+    expect(displayName(t, 'João')).toBe('João');
+    expect(displayName(t, '')).toBe('Player');
+    expect(displayName(t, '   ')).toBe('Player');
   });
 });
 
@@ -23,8 +26,8 @@ describe('initialOf', () => {
 
 describe('workoutsLogged', () => {
   test('says none, one or many', () => {
-    expect(workoutsLogged(0)).toBe('No workouts logged yet');
-    expect(workoutsLogged(1)).toBe('1 workout logged');
-    expect(workoutsLogged(8)).toBe('8 workouts logged');
+    expect(workoutsLogged(t, 0)).toBe('No workouts logged yet');
+    expect(workoutsLogged(t, 1)).toBe('1 workout logged');
+    expect(workoutsLogged(t, 8)).toBe('8 workouts logged');
   });
 });

@@ -8,6 +8,7 @@ import { RoutineChoiceSection } from '@/features/routines/RoutineChoiceSection';
 import { TargetModeSheet } from '@/features/workout/TargetModeSheet';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Destination = { workoutId: number } | { routineId: number };
 
@@ -17,23 +18,24 @@ type Destination = { workoutId: number } | { routineId: number };
  * added at the end, so the targets are set and saved there, like any template change.
  */
 export default function AddToRoutineScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const exercise = useExercise(Number(exerciseId));
   const routines = useRoutines();
   const [pending, setPending] = useState<Destination | null>(null);
   const close = (
-    <IconButton icon="close" accessibilityLabel="Close" onPress={() => router.back()} />
+    <IconButton icon="close" accessibilityLabel={t('common.close')} onPress={() => router.back()} />
   );
 
   if (!exercise) {
     return (
-      <Screen title="Add to Routine" titleVariant="title" left={close} bottomInset>
+      <Screen title={t('addToRoutine.title')} titleVariant="title" left={close} bottomInset>
         <EmptyState
           icon="sports_basketball"
-          title="Exercise not found"
-          message="This exercise doesn't exist anymore."
-          action={{ label: 'Back', onPress: () => router.back() }}
+          title={t('addToRoutine.notFoundTitle')}
+          message={t('addToRoutine.notFoundMessage')}
+          action={{ label: t('common.back'), onPress: () => router.back() }}
         />
       </Screen>
     );
@@ -58,7 +60,7 @@ export default function AddToRoutineScreen() {
 
   return (
     <Screen
-      title="Add to Routine"
+      title={t('addToRoutine.title')}
       titleVariant="title"
       subtitle={exercise.name}
       left={close}
@@ -67,8 +69,8 @@ export default function AddToRoutineScreen() {
       {routines.length === 0 ? (
         <EmptyState
           icon="sports_basketball"
-          title="No routines yet"
-          message="Create a routine on the Workout tab first."
+          title={t('addToRoutine.emptyTitle')}
+          message={t('addToRoutine.emptyMessage')}
         />
       ) : (
         routines.map((routine) => (

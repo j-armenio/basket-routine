@@ -1,8 +1,9 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { radius, size, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import type { AndroidSymbol } from 'expo-symbols';
-import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputProps } from 'react-native';
 import { Icon } from './Icon';
 
 type TextFieldProps = Omit<TextInputProps, 'style' | 'accessibilityLabel'> & {
@@ -25,6 +26,8 @@ export function TextField({
   variant = 'default',
   ...props
 }: TextFieldProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const raised = variant === 'raised';
   const input = (
     <TextInput
@@ -56,7 +59,7 @@ export function TextField({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   base: {
     ...typography.body,
     minHeight: size.inputHeight,
@@ -90,4 +93,4 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
   },
-});
+}));

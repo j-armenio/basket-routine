@@ -1,7 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { size, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { AppText } from './AppText';
 import { Button } from './Button';
 import { Icon } from './Icon';
@@ -14,6 +15,8 @@ type EmptyStateProps = {
 };
 
 export function EmptyState({ icon, title, message, action }: EmptyStateProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.container}>
       <Icon name={icon} size={size.placeholderIcon} color={colors.iconPlaceholder} />
@@ -30,7 +33,7 @@ export function EmptyState({ icon, title, message, action }: EmptyStateProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -41,4 +44,4 @@ const styles = StyleSheet.create({
   centered: {
     textAlign: 'center',
   },
-});
+}));

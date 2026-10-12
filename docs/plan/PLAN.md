@@ -121,6 +121,16 @@ A refinement phase after the redesign lets the developer adjust the look and add
 - The scope is an open list kept in the phase's detailed plan: items come from the developer's own ideas and from `docs/backlog.md`, each one is agreed before it's built, and the list can grow during the phase. Whatever isn't picked stays in the backlog.
 - **Done when:** every item on the list works on the phone and CI is green.
 
+### Phase 9.5 — Language and theme
+- The user picks a language on first launch and can change it later from Settings; the whole UI updates immediately.
+- English and Brazilian Portuguese at launch; predefined exercise names stay in English (content, not UI chrome).
+- A light theme alongside the dark one: Light / Dark / System in Settings, Dark by default, applied immediately.
+- **Done when:** the first-launch picker and the language switch work on the phone in both languages, the theme switch works in its three modes, and CI is green.
+
+### Phase 9.6 — Workout tab layout
+- The Workout tab puts the workouts and their exercises first: routines become a row of chips, New Routine a small header button, and Quick Start a floating button above the tab bar.
+- **Done when:** the new tab works on the phone in both languages and CI is green.
+
 ### Phase 10 — Testing & Release
 - E2E tests of the main flow (create routine → start → log → finish → history), run on the phone against a separate test install, so the real data is never touched.
 - Performance check on the target phone with a long session and a long history.

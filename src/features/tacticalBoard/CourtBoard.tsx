@@ -7,7 +7,7 @@ import {
   type BoardPoint,
   type TacticalBoard,
 } from '@/domain/tacticalBoard';
-import { colors } from '@/theme/colors';
+import { useColors } from '@/theme/ThemeContext';
 import { boardStroke } from '@/theme/spacing';
 import { memo, useMemo } from 'react';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
@@ -66,8 +66,9 @@ function markPath(element: BoardElement): string {
 }
 
 const Mark = memo(function Mark({ element, strokes }: { element: BoardElement; strokes: Strokes }) {
+  const colors = useColors();
   const d = markPath(element);
-  const color = element.type === 'pen' ? colors.primary : colors.textPrimary;
+  const color = element.type === 'pen' ? colors.boardPen : colors.boardMark;
   return (
     <>
       <Path
@@ -92,6 +93,7 @@ const Mark = memo(function Mark({ element, strokes }: { element: BoardElement; s
 });
 
 const Handle = memo(function Handle({ point, strokes }: { point: BoardPoint; strokes: Strokes }) {
+  const colors = useColors();
   const [cx, cy] = toMeters(point);
   const size = HANDLE_SIZE_M;
   const halo = size * 1.6;
@@ -113,8 +115,8 @@ const Handle = memo(function Handle({ point, strokes }: { point: BoardPoint; str
         width={size}
         height={size}
         rx={corner}
-        fill={colors.textPrimary}
-        stroke={colors.backgroundDeep}
+        fill={colors.boardMark}
+        stroke={colors.boardMarkOutline}
         strokeWidth={strokes.line}
       />
     </>
@@ -123,6 +125,7 @@ const Handle = memo(function Handle({ point, strokes }: { point: BoardPoint; str
 
 // Drawn once per size: dragging a mark only redraws the marks.
 const Court = memo(function Court({ lineWidth }: { lineWidth: number }) {
+  const colors = useColors();
   const line = { fill: 'none', stroke: colors.courtLine, strokeWidth: lineWidth } as const;
   return (
     <>

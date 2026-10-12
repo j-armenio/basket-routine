@@ -1,9 +1,12 @@
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { fgTone } from '@/components/fgTone';
-import { formatDuration, formatExerciseList, formatWorkoutDate } from '@/domain/format';
+import { formatWorkoutDate } from '@/domain/format';
+import { formatDuration, formatExerciseList } from '@/i18n/format';
+import { useLanguage } from '@/features/settings/hooks';
 import { spacing } from '@/theme/spacing';
 import { tabularNums } from '@/theme/typography';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { sessionResult, type HistoryItem } from './historyList';
 
@@ -14,8 +17,10 @@ type HistoryRowProps = {
 
 /** A finished session in the History list: what it was, when, and its result on the right. */
 export function HistoryRow({ item, onPress }: HistoryRowProps) {
-  const date = formatWorkoutDate(item.startedAt);
-  const { fgPct, fgBand, checks } = sessionResult(item.summary);
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
+  const date = formatWorkoutDate(item.startedAt, locale);
+  const { fgPct, fgBand, checks } = sessionResult(t, item.summary);
 
   return (
     // The name alone isn't enough: names repeat ("Morning Workout").
@@ -25,10 +30,10 @@ export function HistoryRow({ item, onPress }: HistoryRowProps) {
           {item.name}
         </AppText>
         <AppText variant="subtitle" tone="secondary">
-          {`${date} · ${formatDuration(item.durationMs)}`}
+          {`${date} · ${formatDuration(t, item.durationMs)}`}
         </AppText>
         <AppText variant="caption" tone="secondary" numberOfLines={2}>
-          {formatExerciseList(item.exerciseNames)}
+          {formatExerciseList(t, item.exerciseNames)}
         </AppText>
       </View>
       <View style={styles.result}>

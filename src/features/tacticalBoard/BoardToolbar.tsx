@@ -1,17 +1,28 @@
 import { Icon } from '@/components/Icon';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { border, opacity, radius, size, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { BoardTool } from './boardEditor';
 
-const TOOLS: { value: BoardTool; label: string; icon: AndroidSymbol }[] = [
-  { value: 'hand', label: 'Hand', icon: 'pan_tool' },
-  { value: 'x', label: 'X mark', icon: 'close' },
-  { value: 'arrow', label: 'Arrow', icon: 'arrow_outward' },
-  { value: 'pen', label: 'Pen', icon: 'edit' },
-  { value: 'eraser', label: 'Eraser', icon: 'ink_eraser' },
+const TOOLS: {
+  value: BoardTool;
+  labelKey:
+    | 'tactical.toolHand'
+    | 'tactical.toolX'
+    | 'tactical.toolArrow'
+    | 'tactical.toolPen'
+    | 'tactical.toolEraser';
+  icon: AndroidSymbol;
+}[] = [
+  { value: 'hand', labelKey: 'tactical.toolHand', icon: 'pan_tool' },
+  { value: 'x', labelKey: 'tactical.toolX', icon: 'close' },
+  { value: 'arrow', labelKey: 'tactical.toolArrow', icon: 'arrow_outward' },
+  { value: 'pen', labelKey: 'tactical.toolPen', icon: 'edit' },
+  { value: 'eraser', labelKey: 'tactical.toolEraser', icon: 'ink_eraser' },
 ];
 
 type BoardToolbarProps = {
@@ -38,20 +49,32 @@ export function BoardToolbar({
   onUndo,
   onClear,
 }: BoardToolbarProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   return (
     <SafeAreaView edges={['bottom']} style={styles.bar}>
       <View style={styles.actions}>
-        <Action icon="undo" label="Undo" disabled={!canUndo} onPress={onUndo} />
-        <Action icon="delete" label="Clear board" disabled={!hasMarks} onPress={onClear} />
+        <Action icon="undo" label={t('tactical.undo')} disabled={!canUndo} onPress={onUndo} />
+        <Action
+          icon="delete"
+          label={t('tactical.clearBoard')}
+          disabled={!hasMarks}
+          onPress={onClear}
+        />
       </View>
-      <View accessibilityRole="radiogroup" accessibilityLabel="Drawing tools" style={styles.tools}>
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel={t('tactical.drawingTools')}
+        style={styles.tools}
+      >
         {TOOLS.map((item) => {
           const selected = item.value === tool;
           return (
             <Pressable
               key={item.value}
               accessibilityRole="radio"
-              accessibilityLabel={item.label}
+              accessibilityLabel={t(item.labelKey)}
               accessibilityState={{ selected }}
               onPress={() => onTool(item.value)}
               style={({ pressed }) => [
@@ -84,6 +107,8 @@ function Action({
   disabled: boolean;
   onPress: () => void;
 }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -102,7 +127,7 @@ function Action({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   // No background of its own: only the tools row below (the actual "bar") is filled, so it alone
   // reads as covering the bottom of the screen.
   bar: {
@@ -154,4 +179,4 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: opacity.disabled,
   },
-});
+}));

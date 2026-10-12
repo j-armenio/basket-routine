@@ -15,31 +15,35 @@ import {
 import { ExerciseCard } from '@/features/workout/ExerciseCard';
 import { useInProgressSession, useSessionDetail } from '@/features/workout/hooks';
 import { leaveScreen } from '@/features/workout/navigation';
-import { reasonMessage } from '@/domain/messages';
 import { moveItem } from '@/domain/order';
 import { countEmptySets, hasLoggedData, summarizeSession } from '@/domain/summary';
+import i18n from '@/i18n/i18n';
 import { Redirect, useRouter } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Keyboard } from 'react-native';
 
 /**
  * After a Finish, offers to copy the session's structure to the template it came from, when that
- * differs. Reads by the captured id: the screen has no in-progress session left by then.
+ * differs. Reads by the captured id: the screen has no in-progress session left by then. Not a
+ * component (it fires after `router.replace`), so it reads `i18n.t` directly.
  */
 function offerTemplateUpdate(sessionId: number) {
   const workout = templateUpdateCandidate(sessionId);
   if (!workout) return;
+  const { t } = i18n;
   Alert.alert(
-    `Update "${workout.name}"?`,
-    "Save this workout's exercises, sets and tactical boards to the template. Logged values and notes aren't copied.",
+    t('workout.updateTemplateTitle', { name: workout.name }),
+    t('workout.updateTemplateMessage'),
     [
-      { text: 'Keep template', style: 'cancel' },
+      { text: t('workout.keepTemplate'), style: 'cancel' },
       {
-        text: 'Update template',
+        text: t('workout.updateTemplateAction'),
         onPress: () => {
           const result = updateTemplateFromSession(sessionId);
-          if (!result.ok) Alert.alert("Couldn't update template", reasonMessage(result.reason));
+          if (!result.ok)
+            Alert.alert(t('workout.updateTemplateFailedTitle'), t(`errors.${result.reason}`));
         },
       },
     ],
@@ -47,6 +51,7 @@ function offerTemplateUpdate(sessionId: number) {
 }
 
 export default function ActiveWorkoutScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const session = useInProgressSession();
   const detail = useSessionDetail(session?.id);
@@ -65,35 +70,29 @@ export default function ActiveWorkoutScreen() {
   };
 
   const confirmDiscard = () =>
-    Alert.alert('Discard workout?', 'Everything logged in this workout will be deleted.', [
-      { text: 'Keep going', style: 'cancel' },
-      { text: 'Discard', style: 'destructive', onPress: discard },
+    Alert.alert(t('workout.discardWorkoutTitle'), t('workout.discardWorkoutMessage'), [
+      { text: t('workout.keepGoing'), style: 'cancel' },
+      { text: t('workout.discard'), style: 'destructive', onPress: discard },
     ]);
 
   const finish = () => {
     // Blurs a focused cell, so an invalid entry is rolled back before the user answers.
     Keyboard.dismiss();
     if (!hasLoggedData(summarizeSession(detail.exercises))) {
-      Alert.alert(
-        'Nothing logged yet',
-        'Log at least one set to finish, or discard this workout.',
-        [
-          { text: 'Keep going', style: 'cancel' },
-          { text: 'Discard workout', style: 'destructive', onPress: discard },
-        ],
-      );
+      Alert.alert(t('workout.nothingLoggedTitle'), t('workout.nothingLoggedMessage'), [
+        { text: t('workout.keepGoing'), style: 'cancel' },
+        { text: t('workout.discardWorkoutButton'), style: 'destructive', onPress: discard },
+      ]);
       return;
     }
     const empty = countEmptySets(detail.exercises);
     Alert.alert(
-      'Finish workout?',
-      empty > 0
-        ? `${empty} empty ${empty === 1 ? 'set' : 'sets'} won't count.`
-        : 'It will be saved to your history.',
+      t('workout.finishTitle'),
+      empty > 0 ? t('workout.emptySetsWarning', { count: empty }) : t('workout.willBeSaved'),
       [
-        { text: 'Keep going', style: 'cancel' },
+        { text: t('workout.keepGoing'), style: 'cancel' },
         {
-          text: 'Finish',
+          text: t('workout.finish'),
           onPress: () => {
             if (!finishWorkout(session.id).ok) return;
             haptics.confirm();
@@ -115,20 +114,20 @@ export default function ActiveWorkoutScreen() {
       left={
         <IconButton
           icon="keyboard_arrow_down"
-          accessibilityLabel="Minimize"
+          accessibilityLabel={t('workout.minimize')}
           onPress={() => leaveScreen(router)}
         />
       }
       right={<ElapsedTimer start={session.startedAt} />}
-      footer={<BottomActionBar label="Finish Workout" icon="check" onPress={finish} />}
+      footer={<BottomActionBar label={t('workout.finishWorkout')} icon="check" onPress={finish} />}
       bottomInset
       keyboardAvoiding
     >
       {detail.exercises.length === 0 ? (
         <EmptyState
           icon="sports_basketball"
-          title="Add your first exercise"
-          message="Pick a drill from the catalog and log every set."
+          title={t('workout.emptyTitle')}
+          message={t('workout.emptyMessage')}
         />
       ) : (
         detail.exercises.map((exercise, index) => (
@@ -144,11 +143,16 @@ export default function ActiveWorkoutScreen() {
       <Button
         variant="secondary"
         icon="add"
-        label="Add Exercise"
+        label={t('workout.addExercise')}
         fullWidth
         onPress={() => router.push('/add-exercise')}
       />
-      <Button variant="danger" label="Discard Workout" fullWidth onPress={confirmDiscard} />
+      <Button
+        variant="danger"
+        label={t('workout.discardWorkoutAction')}
+        fullWidth
+        onPress={confirmDiscard}
+      />
     </Screen>
   );
 }

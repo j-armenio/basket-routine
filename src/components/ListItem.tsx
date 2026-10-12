@@ -1,8 +1,9 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { opacity, size, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type PressableProps } from 'react-native';
+import { Pressable, View, type PressableProps } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -20,6 +21,8 @@ type ListItemProps = Omit<PressableProps, 'children' | 'style'> & {
  * a title, an optional subtitle and an optional icon on the right.
  */
 export function ListItem({ title, subtitle, rightIcon, left, ...props }: ListItemProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -42,7 +45,7 @@ export function ListItem({ title, subtitle, rightIcon, left, ...props }: ListIte
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     minHeight: size.buttonPrimaryHeight,
     flexDirection: 'row',
@@ -58,4 +61,4 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.xxs,
   },
-});
+}));

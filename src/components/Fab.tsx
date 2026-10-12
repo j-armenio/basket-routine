@@ -1,7 +1,8 @@
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { elevation, opacity, radius, size, spacing } from '@/theme/spacing';
 import type { AndroidSymbol } from 'expo-symbols';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -18,6 +19,8 @@ type FabProps = {
  * sit on top: give the list under it room at the bottom).
  */
 export function Fab({ label, icon, accessibilityLabel = label, onPress }: FabProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       accessibilityRole="button"
@@ -36,7 +39,7 @@ export function Fab({ label, icon, accessibilityLabel = label, onPress }: FabPro
 /** The room a list needs at its bottom so its last row can scroll out from under the FAB. */
 export const FAB_CLEARANCE = size.buttonPrimaryHeight + 2 * spacing.lg;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   fab: {
     position: 'absolute',
     right: spacing.screenPadding,
@@ -57,4 +60,4 @@ const styles = StyleSheet.create({
   label: {
     color: colors.onPrimary,
   },
-});
+}));

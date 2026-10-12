@@ -23,7 +23,7 @@ import {
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import type { Db } from '@/db/types';
 import { notifyDataChanged } from '@/features/dataStore';
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import {
   act,
   cleanup,
@@ -542,7 +542,7 @@ describe('the profile', () => {
     expect(screen.queryByRole('button', { name: 'Remove photo' })).toBeNull();
   });
 
-  test('the Settings button opens Settings, empty for now; Back returns', async () => {
+  test('the Settings button opens Settings, with the language switch; Back returns', async () => {
     const app = await launch();
     const user = setupUser();
     await user.press(profileTab());
@@ -552,13 +552,33 @@ describe('the profile', () => {
 
     expect(app.getPathname()).toBe('/settings');
     expect(screen.getByRole('header', { name: 'Settings' })).toBeOnTheScreen();
-    expect(screen.getByText('No settings yet')).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'English' })).toBeOnTheScreen();
     expect(screen.getByText(`Basket Routine ${appConfig.expo.version}`)).toBeOnTheScreen();
     expectAccessibleControls();
 
     await user.press(screen.getByRole('button', { name: 'Back' }));
 
     expect(app.getPathname()).toBe('/profile');
+  });
+
+  test('switching the language in Settings updates every mounted screen at once', async () => {
+    const app = await launch();
+    const user = setupUser();
+    await user.press(profileTab());
+    await user.press(screen.getByRole('button', { name: 'Settings' }));
+
+    await user.press(screen.getByRole('radio', { name: 'Português (Brasil)' }));
+
+    expect(screen.getByRole('header', { name: 'Configurações' })).toBeOnTheScreen();
+    expectAccessibleControls();
+
+    await user.press(screen.getByRole('button', { name: 'Voltar' }));
+    expect(app.getPathname()).toBe('/profile');
+    expect(screen.getByRole('header', { name: 'Perfil' })).toBeOnTheScreen();
+
+    // Leaves every other flow test back in English.
+    await user.press(screen.getByRole('button', { name: 'Configurações' }));
+    await user.press(screen.getByRole('radio', { name: 'English' }));
   });
 });
 

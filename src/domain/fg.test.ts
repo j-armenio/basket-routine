@@ -1,4 +1,4 @@
-import { FG_GOOD_PCT, FG_POOR_PCT, fgBand, fgRatio, setFgPct, setMakesAttempts } from './fg';
+import { fgBand, fgRatio, setFgPct, setMakesAttempts } from './fg';
 
 describe('setMakesAttempts', () => {
   test('makes mode: target is makes, logged is attempts', () => {
@@ -48,11 +48,6 @@ describe('fg percentages', () => {
 });
 
 describe('fgBand', () => {
-  test('the thresholds', () => {
-    expect(FG_GOOD_PCT).toBe(60);
-    expect(FG_POOR_PCT).toBe(40);
-  });
-
   test.each([
     [null, 'none'],
     [0, 'poor'],

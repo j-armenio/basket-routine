@@ -1,33 +1,40 @@
 import { AppText } from '@/components/AppText';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { border, opacity, size, spacing } from '@/theme/spacing';
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, View } from 'react-native';
 import { discardWorkout } from './actions';
 import { useInProgressSession } from './hooks';
 
 /** "Workout in progress", above the tab bar on every tab. Renders nothing without a session. */
 export function ResumeBanner() {
+  const styles = useStyles();
+  const { t } = useTranslation();
   const router = useRouter();
   const session = useInProgressSession();
   if (!session) return null;
 
   const confirmDiscard = () =>
-    Alert.alert('Discard workout?', 'Everything logged in this workout will be deleted.', [
-      { text: 'Keep going', style: 'cancel' },
-      { text: 'Discard', style: 'destructive', onPress: () => discardWorkout(session.id) },
+    Alert.alert(t('workout.discardWorkoutTitle'), t('workout.discardWorkoutMessage'), [
+      { text: t('workout.keepGoing'), style: 'cancel' },
+      {
+        text: t('workout.discard'),
+        style: 'destructive',
+        onPress: () => discardWorkout(session.id),
+      },
     ]);
 
   return (
     <View style={styles.banner}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Resume ${session.name}`}
+        accessibilityLabel={t('workout.resumeLabel', { name: session.name })}
         onPress={() => router.push('/active-workout')}
         style={({ pressed }) => [styles.resume, pressed && styles.pressed]}
       >
         <AppText variant="caption" weight="bold" tone="green">
-          Workout in progress
+          {t('workout.inProgress')}
         </AppText>
         <AppText variant="sectionTitle" numberOfLines={1}>
           {session.name}
@@ -35,19 +42,19 @@ export function ResumeBanner() {
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Discard workout"
+        accessibilityLabel={t('workout.discardWorkoutButton')}
         onPress={confirmDiscard}
         style={({ pressed }) => [styles.discard, pressed && styles.pressed]}
       >
         <AppText variant="bodySmall" weight="bold" tone="error">
-          Discard
+          {t('workout.discard')}
         </AppText>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -70,4 +77,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: opacity.pressed,
   },
-});
+}));

@@ -1,4 +1,7 @@
+import i18n from '@/i18n/i18n';
 import { categoryCards, exerciseCount, groupByCategory, isCategoryKey } from './catalogList';
+
+const { t } = i18n;
 
 const ex = (name: string, category: 'finishing' | 'dribbling' | 'shooting' | 'footwork') => ({
   name,
@@ -7,7 +10,7 @@ const ex = (name: string, category: 'finishing' | 'dribbling' | 'shooting' | 'fo
 
 describe('groupByCategory', () => {
   test('groups by category in the catalog order and keeps each list in order', () => {
-    const sections = groupByCategory([
+    const sections = groupByCategory(t, [
       ex('Free Throws', 'shooting'),
       ex('Crossover', 'dribbling'),
       ex('Layups', 'finishing'),
@@ -19,8 +22,10 @@ describe('groupByCategory', () => {
   });
 
   test('leaves out empty categories, and gives nothing for no exercises', () => {
-    expect(groupByCategory([ex('Zig Zag', 'footwork')]).map((s) => s.title)).toEqual(['Footwork']);
-    expect(groupByCategory([])).toEqual([]);
+    expect(groupByCategory(t, [ex('Zig Zag', 'footwork')]).map((s) => s.title)).toEqual([
+      'Footwork',
+    ]);
+    expect(groupByCategory(t, [])).toEqual([]);
   });
 });
 
@@ -31,7 +36,7 @@ describe('the category cards', () => {
   });
 
   test('one card per category in the catalog order, then Custom, with their counts', () => {
-    const cards = categoryCards([
+    const cards = categoryCards(t, [
       item('shooting'),
       item('shooting', true),
       item('finishing'),
@@ -50,7 +55,7 @@ describe('the category cards', () => {
   });
 
   test('no exercises: every card is still there, empty', () => {
-    expect(categoryCards([]).map((card) => card.count)).toEqual([0, 0, 0, 0, 0, 0]);
+    expect(categoryCards(t, []).map((card) => card.count)).toEqual([0, 0, 0, 0, 0, 0]);
   });
 
   test('a route key is a category or custom', () => {
@@ -61,8 +66,8 @@ describe('the category cards', () => {
   });
 
   test('the count reads naturally', () => {
-    expect(exerciseCount(0)).toBe('0 exercises');
-    expect(exerciseCount(1)).toBe('1 exercise');
-    expect(exerciseCount(8)).toBe('8 exercises');
+    expect(exerciseCount(t, 0)).toBe('0 exercises');
+    expect(exerciseCount(t, 1)).toBe('1 exercise');
+    expect(exerciseCount(t, 8)).toBe('8 exercises');
   });
 });

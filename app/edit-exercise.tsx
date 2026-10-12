@@ -8,15 +8,7 @@ import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import type { Exercise } from '@/db/types';
 import { pickedMedia, type PickedMedia } from '@/domain/media';
-import { reasonMessage } from '@/domain/messages';
-import {
-  CATEGORIES,
-  CATEGORY_LABELS,
-  TRACKING_LABELS,
-  TRACKING_TYPES,
-  type Category,
-  type TrackingType,
-} from '@/domain/types';
+import { CATEGORIES, TRACKING_TYPES, type Category, type TrackingType } from '@/domain/types';
 import { createExercise, updateExercise, type MediaChange } from '@/features/exercises/actions';
 import { useExercise } from '@/features/exercises/hooks';
 import { exerciseMedia } from '@/features/exercises/mediaSource';
@@ -26,15 +18,8 @@ import { radius, size, spacing } from '@/theme/spacing';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
-
-const CATEGORY_OPTIONS = CATEGORIES.map((value) => ({ value, label: CATEGORY_LABELS[value] }));
-const TRACKING_OPTIONS = TRACKING_TYPES.map((value) => ({ value, label: TRACKING_LABELS[value] }));
-
-const PICK_MESSAGES = {
-  too_long: 'Choose a video of 30 seconds or less.',
-  unsupported: "This file type isn't supported. Choose an image, a GIF or a video.",
-};
 
 const parseId = (value: string | undefined) => (value === undefined ? undefined : Number(value));
 
@@ -45,16 +30,17 @@ export default function EditExerciseScreen() {
   const editingId = parseId(params.exerciseId);
   const exercise = useExercise(editingId);
 
+  const { t } = useTranslation();
   // A predefined exercise is read-only.
   if (editingId !== undefined && !exercise?.isCustom) {
     return (
       <Screen
-        title="Edit Exercise"
+        title={t('exercises.editExerciseTitle')}
         titleVariant="title"
         left={
           <IconButton
             icon="close"
-            accessibilityLabel="Cancel"
+            accessibilityLabel={t('common.cancel')}
             onPress={() => leaveScreen(router)}
           />
         }
@@ -62,9 +48,9 @@ export default function EditExerciseScreen() {
       >
         <EmptyState
           icon="sports_basketball"
-          title="Exercise not found"
-          message="This exercise doesn't exist anymore, or can't be edited."
-          action={{ label: 'Back', onPress: () => leaveScreen(router) }}
+          title={t('exercises.notFoundTitle')}
+          message={t('exercises.notFoundMessage')}
+          action={{ label: t('common.back'), onPress: () => leaveScreen(router) }}
         />
       </Screen>
     );
@@ -74,8 +60,17 @@ export default function EditExerciseScreen() {
 }
 
 function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const editing = exercise !== undefined;
+  const categoryOptions = CATEGORIES.map((value) => ({
+    value,
+    label: t(`labels.category.${value}`),
+  }));
+  const trackingOptions = TRACKING_TYPES.map((value) => ({
+    value,
+    label: t(`labels.tracking.${value}`),
+  }));
   const [name, setName] = useState(exercise?.name ?? '');
   const [category, setCategory] = useState<Category>(exercise?.category ?? 'shooting');
   const [trackingType, setTrackingType] = useState<TrackingType>(
@@ -112,7 +107,13 @@ function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
       setMedia({ type: 'replace', media: picked.media });
       setError(null);
     } else {
-      setError(PICK_MESSAGES[picked.reason]);
+      setError(
+        t(
+          picked.reason === 'too_long'
+            ? 'exercises.videoTooLong'
+            : 'exercises.unsupportedMediaType',
+        ),
+      );
     }
   };
 
@@ -122,31 +123,35 @@ function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
       ? updateExercise(exercise.id, { name, category, description }, media)
       : createExercise({ name, category, trackingType, description }, replacement);
     if (result.ok) leaveScreen(router);
-    else setError(reasonMessage(result.reason));
+    else setError(t(`errors.${result.reason}`));
   };
 
   return (
     <Screen
-      title={editing ? 'Edit Exercise' : 'New Exercise'}
+      title={t(editing ? 'exercises.editExerciseTitle' : 'exercises.newExerciseTitle')}
       titleVariant="title"
       left={
-        <IconButton icon="close" accessibilityLabel="Cancel" onPress={() => leaveScreen(router)} />
+        <IconButton
+          icon="close"
+          accessibilityLabel={t('common.cancel')}
+          onPress={() => leaveScreen(router)}
+        />
       }
-      footer={<BottomActionBar label="Save Exercise" onPress={save} />}
+      footer={<BottomActionBar label={t('exercises.saveExercise')} onPress={save} />}
       bottomInset
       keyboardAvoiding
     >
-      <Field label="Name">
+      <Field label={t('common.name')}>
         <TextField
-          accessibilityLabel="Exercise name"
-          placeholder="Exercise name"
+          accessibilityLabel={t('exercises.namePlaceholder')}
+          placeholder={t('exercises.namePlaceholder')}
           value={name}
           onChangeText={change(setName)}
           autoFocus={!editing}
           returnKeyType="done"
         />
       </Field>
-      <Field label="Media">
+      <Field label={t('exercises.media')}>
         <View testID="exercise-media">
           <MediaView
             media={shownMedia}
@@ -160,13 +165,13 @@ function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
           <Button
             variant="outline"
             icon="photo_library"
-            label={shownMedia ? 'Change media' : 'Choose media'}
+            label={t(shownMedia ? 'exercises.changeMedia' : 'exercises.chooseMedia')}
             onPress={chooseMedia}
           />
           {shownMedia && (
             <Button
               variant="danger"
-              label="Remove media"
+              label={t('exercises.removeMedia')}
               onPress={() => {
                 setMedia({ type: 'remove' });
                 setError(null);
@@ -175,12 +180,12 @@ function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
           )}
         </View>
       </Field>
-      <Field label="Category">
-        <ChipRow options={CATEGORY_OPTIONS} value={category} onChange={change(setCategory)} wrap />
+      <Field label={t('exercises.category')}>
+        <ChipRow options={categoryOptions} value={category} onChange={change(setCategory)} wrap />
       </Field>
-      <Field label="Tracking type">
+      <Field label={t('exercises.trackingType')}>
         <ChipRow
-          options={TRACKING_OPTIONS}
+          options={trackingOptions}
           value={trackingType}
           onChange={change(setTrackingType)}
           disabled={editing}
@@ -188,14 +193,14 @@ function ExerciseForm({ exercise }: { exercise: Exercise | undefined }) {
         />
         {editing && (
           <AppText variant="caption" tone="secondary">
-            Tracking type can&apos;t be changed after the exercise is created
+            {t('exercises.trackingTypeLocked')}
           </AppText>
         )}
       </Field>
-      <Field label="Description">
+      <Field label={t('exercises.description')}>
         <TextField
-          accessibilityLabel="Description"
-          placeholder="How to do the drill"
+          accessibilityLabel={t('exercises.description')}
+          placeholder={t('exercises.descriptionPlaceholder')}
           value={description}
           onChangeText={change(setDescription)}
           multiline

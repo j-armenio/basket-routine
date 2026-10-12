@@ -1,6 +1,7 @@
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { size as sizes } from '@/theme/spacing';
 import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
@@ -18,6 +19,8 @@ type AvatarProps = {
  * with no name either). Hidden from accessibility: what presses it names it.
  */
 export function Avatar({ name, photoUri, size }: AvatarProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const initial = initialOf(name);
   const circle = { width: size, height: size, borderRadius: size / 2 };
   return (
@@ -45,11 +48,11 @@ export function Avatar({ name, photoUri, size }: AvatarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   circle: {
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.secondary,
   },
-});
+}));

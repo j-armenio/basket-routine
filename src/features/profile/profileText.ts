@@ -1,5 +1,7 @@
+import type { TFunction } from 'i18next';
+
 /** The name on the Profile card: the user's, or "Player" until they set one. */
-export const displayName = (name: string) => name.trim() || 'Player';
+export const displayName = (t: TFunction, name: string) => name.trim() || t('profile.player');
 
 /** The avatar's letter when there is no photo, or `undefined` with no name (a person icon then). */
 export function initialOf(name: string): string | undefined {
@@ -8,7 +10,7 @@ export function initialOf(name: string): string | undefined {
 }
 
 /** "No workouts logged yet", "1 workout logged", "8 workouts logged". */
-export function workoutsLogged(count: number): string {
-  if (count === 0) return 'No workouts logged yet';
-  return `${count} ${count === 1 ? 'workout' : 'workouts'} logged`;
+export function workoutsLogged(t: TFunction, count: number): string {
+  if (count === 0) return t('profile.workoutsLoggedNone');
+  return t('profile.workoutsLogged', { count });
 }

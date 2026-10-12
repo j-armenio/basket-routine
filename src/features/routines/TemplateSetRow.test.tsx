@@ -1,4 +1,4 @@
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native';
 import { closeDraft, getDraft, openDraft, useDraft } from './draftStore';
 import { TemplateSetRow } from './TemplateSetRow';

@@ -5,7 +5,6 @@ import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { pickedMedia } from '@/domain/media';
-import { reasonMessage } from '@/domain/messages';
 import type { MediaChange } from '@/features/exercises/actions';
 import { saveProfile } from '@/features/profile/actions';
 import { Avatar } from '@/features/profile/Avatar';
@@ -16,9 +15,8 @@ import { size, spacing } from '@/theme/spacing';
 import { launchImageLibraryAsync } from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
-
-const NOT_A_PHOTO = "This file type isn't supported. Choose an image.";
 
 /** The profile form: the name and the photo, saved together. */
 export default function EditProfileScreen() {
@@ -27,6 +25,7 @@ export default function EditProfileScreen() {
 }
 
 function ProfileForm({ profile }: { profile: Profile }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [name, setName] = useState(profile.name);
   const [photo, setPhoto] = useState<MediaChange>({ type: 'keep' });
@@ -49,28 +48,32 @@ function ProfileForm({ profile }: { profile: Profile }) {
       setPhoto({ type: 'replace', media: picked.media });
       setError(null);
     } else {
-      setError(NOT_A_PHOTO);
+      setError(t('profile.unsupportedPhotoType'));
     }
   };
 
   const save = () => {
     const result = saveProfile(name, photo);
     if (result.ok) leaveScreen(router);
-    else setError(reasonMessage(result.reason));
+    else setError(t(`errors.${result.reason}`));
   };
 
   return (
     <Screen
-      title="Edit Profile"
+      title={t('profile.editProfile')}
       titleVariant="title"
       left={
-        <IconButton icon="close" accessibilityLabel="Cancel" onPress={() => leaveScreen(router)} />
+        <IconButton
+          icon="close"
+          accessibilityLabel={t('common.cancel')}
+          onPress={() => leaveScreen(router)}
+        />
       }
-      footer={<BottomActionBar label="Save Profile" onPress={save} />}
+      footer={<BottomActionBar label={t('profile.saveProfile')} onPress={save} />}
       bottomInset
       keyboardAvoiding
     >
-      <Field label="Photo">
+      <Field label={t('profile.photo')}>
         <View style={styles.photo}>
           <Avatar name={name} photoUri={shownPhoto} size={size.avatarLarge} />
         </View>
@@ -78,13 +81,13 @@ function ProfileForm({ profile }: { profile: Profile }) {
           <Button
             variant="outline"
             icon="photo_library"
-            label={shownPhoto ? 'Change photo' : 'Choose photo'}
+            label={t(shownPhoto ? 'profile.changePhoto' : 'profile.choosePhoto')}
             onPress={choosePhoto}
           />
           {shownPhoto && (
             <Button
               variant="danger"
-              label="Remove photo"
+              label={t('profile.removePhoto')}
               onPress={() => {
                 setPhoto({ type: 'remove' });
                 setError(null);
@@ -93,10 +96,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
           )}
         </View>
       </Field>
-      <Field label="Name">
+      <Field label={t('common.name')}>
         <TextField
-          accessibilityLabel="Name"
-          placeholder="Your name"
+          accessibilityLabel={t('common.name')}
+          placeholder={t('profile.namePlaceholder')}
           value={name}
           onChangeText={(value) => {
             setName(value);

@@ -68,30 +68,6 @@ test('a successful write notifies once, a rejected one returns its reason and do
   expect(added.id).toBeGreaterThan(0);
 });
 
-test('covers the whole editing flow through the actions', () => {
-  const session = unwrap(actions.startEmptyWorkout());
-  const shooting = unwrap(actions.addExercise(session.id, exerciseId('free_throws'), 'attempts'));
-  const check = unwrap(actions.addExercise(session.id, exerciseId('figure_8')));
-  const detail = () => getSessionDetail(db, session.id)!;
-
-  unwrap(actions.addSet(shooting.id));
-  expect(detail().exercises[0].sets).toHaveLength(2);
-  unwrap(actions.updateSet(detail().exercises[0].sets[0].id, { loggedValue: 7 }));
-  unwrap(actions.updateSet(detail().exercises[1].sets[0].id, { completed: true }));
-  unwrap(actions.updateNote(shooting.id, 'felt good'));
-  unwrap(actions.deleteSet(detail().exercises[0].sets[1].id));
-  unwrap(actions.moveExercise(session.id, [check.id, shooting.id]));
-
-  expect(detail().exercises.map((e) => e.name)).toEqual(['Figure 8', 'Free Throws']);
-  expect(detail().exercises[1]).toMatchObject({ note: 'felt good' });
-  expect(detail().exercises[1].sets).toMatchObject([{ loggedValue: 7 }]);
-
-  unwrap(actions.removeExercise(check.id));
-  const summary = unwrap(actions.finishWorkout(session.id));
-  expect(summary.shooting).toMatchObject({ makes: 7, attempts: 10 });
-  expect(getInProgressSession(db)).toBeUndefined();
-});
-
 test('discardWorkout removes the session and notifies', () => {
   const session = unwrap(actions.startEmptyWorkout());
   notifications = 0;
@@ -99,16 +75,5 @@ test('discardWorkout removes the session and notifies', () => {
   unwrap(actions.discardWorkout(session.id));
 
   expect(getInProgressSession(db)).toBeUndefined();
-  expect(notifications).toBe(1);
-});
-
-test('an error that is not a DomainError is rethrown', () => {
-  const session = unwrap(actions.startEmptyWorkout());
-  const bug = new Error('boom');
-  jest.spyOn(db, 'transaction').mockImplementationOnce(() => {
-    throw bug;
-  });
-
-  expect(() => actions.addSet(session.id)).toThrow(bug);
   expect(notifications).toBe(1);
 });

@@ -3,9 +3,11 @@ import { Card } from '@/components/Card';
 import { fgTone } from '@/components/fgTone';
 import { StatTile } from '@/components/StatTile';
 import { fgBand } from '@/domain/fg';
-import { formatDuration, formatFgPct } from '@/domain/format';
+import { formatFgPct } from '@/domain/format';
 import type { ProfileStats } from '@/features/history/historyList';
+import { formatDuration } from '@/i18n/format';
 import { spacing } from '@/theme/spacing';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 /**
@@ -13,17 +15,23 @@ import { StyleSheet, View } from 'react-native';
  * Σattempts), the shots, and the time trained.
  */
 export function ProfileStatsCard({ stats }: { stats: ProfileStats }) {
+  const { t } = useTranslation();
   const { shooting } = stats;
   return (
     <Card style={styles.card}>
       <AppText variant="sectionTitle" accessibilityRole="header">
-        Your stats
+        {t('profile.yourStats')}
       </AppText>
       <View style={styles.tiles}>
-        <StatTile testID="stat-sessions" label="Sessions" value={String(stats.sessions)} large />
+        <StatTile
+          testID="stat-sessions"
+          label={t('profile.sessions')}
+          value={String(stats.sessions)}
+          large
+        />
         <StatTile
           testID="avg-fg"
-          label="Avg FG%"
+          label={t('profile.avgFgPct')}
           value={formatFgPct(shooting.fgPct)}
           tone={fgTone(fgBand(shooting.fgPct))}
           large
@@ -32,13 +40,13 @@ export function ProfileStatsCard({ stats }: { stats: ProfileStats }) {
       <View style={styles.tiles}>
         <StatTile
           testID="stat-shots"
-          label="Shots made"
+          label={t('profile.shotsMade')}
           value={shooting.attempts > 0 ? `${shooting.makes} / ${shooting.attempts}` : '—'}
         />
         <StatTile
           testID="stat-time"
-          label="Time trained"
-          value={formatDuration(stats.durationMs)}
+          label={t('profile.timeTrained')}
+          value={formatDuration(t, stats.durationMs)}
         />
       </View>
     </Card>

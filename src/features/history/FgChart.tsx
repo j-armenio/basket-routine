@@ -1,10 +1,12 @@
 import { AppText } from '@/components/AppText';
 import { formatFgPct } from '@/domain/format';
-import { colors } from '@/theme/colors';
+import { useLanguage } from '@/features/settings/hooks';
+import { makeStyles } from '@/theme/makeStyles';
 import { border, size, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 import { chartDateLabels, fgEvolutionLabel, spreadLabels, type FgPoint } from './historyList';
 
 // The geometry of the History mockup's chart, in dp: the y-axis labels on the left, the plot
@@ -38,6 +40,9 @@ const yOf = (ratio: number) => PLOT_TOP + (1 - ratio) * (PLOT_BOTTOM - PLOT_TOP)
  * session).
  */
 export function FgChart({ points, all = false }: { points: FgPoint[]; all?: boolean }) {
+  const styles = useStyles();
+  const { t } = useTranslation();
+  const { locale } = useLanguage();
   const [width, setWidth] = useState(0);
   const left = AXIS_WIDTH + INSET_LEFT;
   const right = width - INSET_RIGHT;
@@ -47,7 +52,7 @@ export function FgChart({ points, all = false }: { points: FgPoint[]; all?: bool
   const last = coords.at(-1);
   const dots = step >= 2 * DOT ? coords : coords.slice(-1);
   const dateLabels = spreadLabels(
-    chartDateLabels(points),
+    chartDateLabels(points, locale),
     ({ first, last: lastIndex }) => (xOf(first) + xOf(lastIndex)) / 2,
     LABEL_BOX,
   );
@@ -56,7 +61,7 @@ export function FgChart({ points, all = false }: { points: FgPoint[]; all?: bool
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel={fgEvolutionLabel(points, all)}
+      accessibilityLabel={fgEvolutionLabel(t, locale, points, all)}
       style={styles.chart}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
     >
@@ -143,7 +148,7 @@ export function FgChart({ points, all = false }: { points: FgPoint[]; all?: bool
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   chart: {
     height: size.chartHeight,
   },
@@ -177,4 +182,4 @@ const styles = StyleSheet.create({
     width: LABEL_BOX,
     textAlign: 'center',
   },
-});
+}));

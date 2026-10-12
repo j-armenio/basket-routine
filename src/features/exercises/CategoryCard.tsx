@@ -1,8 +1,10 @@
 import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
+import { useColors } from '@/theme/ThemeContext';
 import { opacity, radius, size, spacing } from '@/theme/spacing';
 import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { exerciseCount, type CategoryCardData } from './catalogList';
 import { CATEGORY_IMAGES } from './categoryImages';
@@ -18,8 +20,11 @@ type CategoryCardProps = {
  * text stays readable on any image.
  */
 export function CategoryCard({ card, onPress }: CategoryCardProps) {
+  const styles = useStyles();
+  const colors = useColors();
+  const { t } = useTranslation();
   const image = CATEGORY_IMAGES[card.key];
-  const count = exerciseCount(card.count);
+  const count = exerciseCount(t, card.count);
   return (
     <Pressable
       accessibilityRole="button"
@@ -61,6 +66,7 @@ export function CategoryGrid({
   cards: CategoryCardData[];
   onPressCard: (card: CategoryCardData) => void;
 }) {
+  const styles = useStyles();
   const rows: CategoryCardData[][] = [];
   for (let i = 0; i < cards.length; i += 2) rows.push(cards.slice(i, i + 2));
   return (
@@ -79,7 +85,7 @@ export function CategoryGrid({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   grid: {
     gap: spacing.itemGap,
   },
@@ -112,4 +118,4 @@ const styles = StyleSheet.create({
   band: {
     backgroundColor: colors.scrim,
   },
-});
+}));

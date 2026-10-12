@@ -1,9 +1,10 @@
 import { AppText } from '@/components/AppText';
 import { TextField } from '@/components/TextField';
-import { colors } from '@/theme/colors';
+import { makeStyles } from '@/theme/makeStyles';
 import { opacity, radius, size, spacing } from '@/theme/spacing';
 import { useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable } from 'react-native';
 import { updateNote } from './actions';
 
 type ExerciseNoteProps = {
@@ -17,17 +18,19 @@ type ExerciseNoteProps = {
  * stretch the card. Tapping it opens the field, which grows up to four lines and then scrolls.
  */
 export function ExerciseNote({ exerciseId, name, note }: ExerciseNoteProps) {
+  const styles = useStyles();
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   // Nothing else edits the note, so the field keeps its own text and writes it through.
   const [text, setText] = useState(note);
-  const label = `${name} note`;
+  const label = t('workout.noteLabel', { name });
 
   if (editing) {
     return (
       <TextField
         variant="raised"
         accessibilityLabel={label}
-        placeholder="Add a note"
+        placeholder={t('workout.addNote')}
         multiline
         maxLines={4}
         autoFocus
@@ -55,14 +58,14 @@ export function ExerciseNote({ exerciseId, name, note }: ExerciseNoteProps) {
         numberOfLines={2}
         ellipsizeMode="tail"
       >
-        {text === '' ? 'Add a note' : text}
+        {text === '' ? t('workout.addNote') : text}
       </AppText>
     </Pressable>
   );
 }
 
 // At rest it looks like the field it opens into.
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   note: {
     minHeight: size.minTouchTarget,
     justifyContent: 'center',
@@ -74,4 +77,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: opacity.pressed,
   },
-});
+}));

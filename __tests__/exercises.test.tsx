@@ -18,7 +18,7 @@ import { exercises, routines, sessions, workouts } from '@/db/schema';
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import type { Db, Exercise } from '@/db/types';
 import { notifyDataChanged } from '@/features/dataStore';
-import { colors } from '@/theme/colors';
+import { darkColors as colors } from '@/theme/colors';
 import { act, cleanup, fireEvent, screen, userEvent, within } from '@testing-library/react-native';
 import { eq } from 'drizzle-orm';
 import { renderRouter } from 'expo-router/testing-library';
@@ -816,7 +816,7 @@ describe('finishing after an exercise was deleted mid-session', () => {
       archiveCustomExercise(db, custom.id); // the session keeps its snapshot
       notifyDataChanged();
     });
-    await user.press(screen.getByRole('button', { name: 'Resume Workout' }));
+    await user.press(screen.getByRole('button', { name: 'Resume Mixed' }));
     expect(screen.getByText('Cone Slalom')).toBeOnTheScreen();
   }
 
