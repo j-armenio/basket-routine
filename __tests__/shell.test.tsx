@@ -1,3 +1,4 @@
+import { SEED_EXERCISES } from '@/db/seed/exercises';
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import { size } from '@/theme/spacing';
 import { fireEvent, screen, userEvent, within } from '@testing-library/react-native';
@@ -47,7 +48,7 @@ test('starts on Workout and switches between the three tabs', async () => {
 
   await user.press(screen.getByRole('tab', { name: 'Exercises' }));
   expect(app.getPathname()).toBe('/exercises');
-  expect(screen.getByText('44 exercises')).toBeOnTheScreen();
+  expect(screen.getByText(`${SEED_EXERCISES.length} exercises`)).toBeOnTheScreen();
   expectAccessibleControls();
 
   await user.press(screen.getByRole('tab', { name: 'Profile' }));

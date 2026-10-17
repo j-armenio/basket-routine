@@ -86,6 +86,52 @@ describe('schema and migrations', () => {
     });
   });
 
+  test('migration 0003 folds Left-Hand Layups into Layups, and is a no-op on a fresh DB', () => {
+    const raw = new Database(':memory:');
+    raw.pragma('foreign_keys = OFF'); // only the exercise ids matter here
+    for (const file of [
+      '0000_true_deadpool.sql',
+      '0001_neat_excalibur.sql',
+      '0002_clear_empty_tactical_boards.sql',
+    ]) {
+      runMigrationFile(raw, file);
+    }
+    raw.exec(`insert into exercises (id, seed_key, name, category, tracking_type, created_at, updated_at)
+      values (1, 'right_hand_layups', 'Right-Hand Layups', 'finishing', 'makes_attempts', 0, 0),
+             (2, 'left_hand_layups', 'Left-Hand Layups', 'finishing', 'makes_attempts', 0, 0)`);
+    raw.exec(`insert into workout_exercises (workout_id, exercise_id, position)
+      values (1, 1, 0), (1, 2, 1)`);
+    raw.exec(`insert into session_exercises (session_id, exercise_id, position, name, category, tracking_type)
+      values (1, 2, 0, 'Left-Hand Layups', 'finishing', 'makes_attempts')`);
+
+    runMigrationFile(raw, '0003_merge_hand_layups.sql');
+
+    expect(
+      raw.prepare('select id, seed_key, archived_at from exercises order by id').all(),
+    ).toEqual([
+      { id: 1, seed_key: 'layups', archived_at: null },
+      { id: 2, seed_key: 'left_hand_layups', archived_at: expect.any(Number) },
+    ]);
+    expect(raw.prepare('select exercise_id from workout_exercises').all()).toEqual([
+      { exercise_id: 1 },
+      { exercise_id: 1 },
+    ]);
+    // the session keeps the name it was logged under
+    expect(raw.prepare('select exercise_id, name from session_exercises').get()).toEqual({
+      exercise_id: 1,
+      name: 'Left-Hand Layups',
+    });
+
+    const fresh = new Database(':memory:');
+    for (const file of fs
+      .readdirSync(path.join(__dirname, 'migrations'))
+      .filter((f) => f.endsWith('.sql'))
+      .sort()) {
+      runMigrationFile(fresh, file);
+    }
+    expect(fresh.prepare('select count(*) as n from exercises').get()).toEqual({ n: 0 });
+  });
+
   test('partial unique index rejects a second in_progress session', () => {
     const db = createTestDb();
     db.insert(sessions).values({ name: 'A', status: 'in_progress', startedAt: new Date() }).run();

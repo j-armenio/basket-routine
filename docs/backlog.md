@@ -16,7 +16,7 @@ Pending items: known issues left open, content still to come, and ideas for afte
 
 ## Content
 
-- **Media for the 44 predefined exercises** (Phase 6), supplied by the developer. 10 done so far (Form Shooting, Free Throws, Step-Back Jumpers, Pull-Up Jumpers and six new shooting drills); the other 34 show the placeholder. One file per
+- **Media for the 48 predefined exercises** (Phase 6), supplied by the developer. 18 done so far (Form Shooting, Free Throws, Step-Back Jumpers, Pull-Up Jumpers, six new shooting drills, Layups, Reverse Layups, Floaters and five new finishing drills); the other 30 show the placeholder. One file per
   exercise in `assets/exercises/<seedKey>.<ext>` (image, GIF, or video up to 30 s, kept small since
   it ships in the APK) plus its line in `src/features/exercises/seedMedia.ts`; `npm test` names a
   missing line. Recommended format: vertical MP4, 270 × 480,

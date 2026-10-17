@@ -58,7 +58,7 @@ describe('exercises', () => {
     expect(names({ customOnly: true })).toEqual(['My Layups', 'My Slalom']);
     expect(names({ customOnly: true, search: 'layups' })).toEqual(['My Layups']);
     expect(names({ customOnly: true, category: 'footwork' })).toEqual(['My Slalom']);
-    expect(names({ search: 'layups' })).toContain('Right-Hand Layups');
+    expect(names({ search: 'layups' })).toContain('Layups');
   });
 
   test('predefined exercises are read-only', () => {

@@ -16,7 +16,7 @@ I built it for my own training.
 
 - **Routines → workouts → sessions.** Group workout templates into routines, start one (or an empty workout) and log each set. An unfinished workout can be resumed later.
 - **Shooting stats.** Sets track makes and attempts, or a simple check. FG% is computed per set, per exercise and per session, and colored by range (above 60%, 40–60%, below 40%).
-- **Exercise catalog.** 44 built-in drills in 5 categories (shooting, finishing, ball handling, dribbling, footwork), some with demo videos. You can also create custom exercises with your own photo or video.
+- **Exercise catalog.** 48 built-in drills in 5 categories (shooting, finishing, ball handling, dribbling, footwork), some with demo videos. You can also create custom exercises with your own photo or video.
 - **History and progress.** Full history by month, a session detail view, per-exercise stats and an FG% evolution chart on the profile.
 - **Tactical board.** Draw plays on a half court and attach them to an exercise.
 - **Polish.** Drag-to-reorder, swipe-to-delete, haptics, dark/light theme, and English and Brazilian Portuguese.

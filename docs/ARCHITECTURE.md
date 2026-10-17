@@ -56,8 +56,8 @@ números acima em palavras.
 | `types.ts` | Tipo `Db` (serve para expo-sqlite, better-sqlite3 e `tx`) e tipos das linhas |
 | `client.ts` | Abre `basket-routine.db` no aparelho |
 | `useDatabaseSetup.ts` | Roda as migrations e o seed na inicialização |
-| `migrations/` | Gerado pelo `drizzle-kit` (`0000`–`0002`); somente acréscimo, nunca editar |
-| `seed/` | Os 44 exercícios predefinidos (`exercises.ts`) e o upsert por `seedKey` (`seed.ts`) |
+| `migrations/` | Gerado pelo `drizzle-kit` (`0000`–`0003`); somente acréscimo, nunca editar |
+| `seed/` | Os 48 exercícios predefinidos (`exercises.ts`) e o upsert por `seedKey` (`seed.ts`) |
 | `repositories/` | Funções `(db, ...)` por agregado: `exercises`, `routines`, `workouts`, `sessions` (+ `common.ts`) |
 | `test-utils.ts` | `createTestDb()`: banco em memória com as migrations reais |
 

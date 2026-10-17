@@ -22,6 +22,13 @@
       "when": 1790746211144,
       "tag": "0002_clear_empty_tactical_boards",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792201770917,
+      "tag": "0003_merge_hand_layups",
+      "breakpoints": true
     }
   ]
 }

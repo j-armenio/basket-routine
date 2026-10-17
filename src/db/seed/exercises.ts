@@ -126,14 +126,9 @@ export const SEED_EXERCISES: SeedExercise[] = [
     'Like the Mikan drill but finishing on the opposite side of the rim, going under it. Trains touch and reach around the basket.',
   ),
   finishing(
-    'right_hand_layups',
-    'Right-Hand Layups',
-    'Drive from the right side and finish with the right hand off the correct foot. Focus on the soft touch off the glass.',
-  ),
-  finishing(
-    'left_hand_layups',
-    'Left-Hand Layups',
-    'Drive from the left side and finish with the left hand off the correct foot. Take it slow first, then add speed.',
+    'layups',
+    'Layups',
+    'Drive and finish off the glass with the outside hand, taking off from the correct foot. Focus on the soft touch off the backboard and practice from both sides.',
   ),
   finishing(
     'reverse_layups',
@@ -159,6 +154,31 @@ export const SEED_EXERCISES: SeedExercise[] = [
     'hook_shots',
     'Hook Shots',
     'Finish near the rim with a hook shot: shoulder to the basket, sweep the ball up with the far hand and release softly. Practice both hands.',
+  ),
+  finishing(
+    'extended_hook',
+    'Extended Hook',
+    'Finish off the drive with a hook, extending the arm fully away from the defender and releasing softly over the shoulder. Practice with both hands.',
+  ),
+  finishing(
+    'switch_hand_reverse',
+    'Switch-Hand Reverse',
+    'Attack the rim, go under it and switch the ball to the other hand to finish on the far side, using the rim to shield the ball.',
+  ),
+  finishing(
+    'inside_hand_layup',
+    'Inside-Hand Layup',
+    'Finish with the hand closest to the rim, keeping the ball on the inside away from the defender. Protect it with your body and the glass.',
+  ),
+  finishing(
+    'same_foot_same_hand_layup',
+    'Same-Foot Same-Hand Layup',
+    'Take off from the foot on the same side as the finishing hand, a different timing that can catch the defender off guard. Keep the touch soft off the glass.',
+  ),
+  finishing(
+    'jump_into_contact_layup',
+    'Jump-Into-Contact Layup',
+    'Jump into the defender and finish through contact, keeping the ball high and away from the body of the defender. Stay strong and balanced in the air.',
   ),
   // Ball handling
   drill(
