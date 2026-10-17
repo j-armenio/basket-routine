@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable } from 'react-native';
 import { deleteWorkout } from './actions';
+import { exportWorkoutFile } from './workoutTransfer';
 
 type WorkoutCardProps = {
   workout: WorkoutInRoutine;
@@ -18,11 +19,20 @@ type WorkoutCardProps = {
   count: number;
   onStart: () => void;
   onEdit: () => void;
+  onShowQr: () => void;
   onMove: (delta: -1 | 1) => void;
 };
 
 /** A template on the Workout tab: tap the body to edit it, the play button to begin a session from it. */
-export function WorkoutCard({ workout, index, count, onStart, onEdit, onMove }: WorkoutCardProps) {
+export function WorkoutCard({
+  workout,
+  index,
+  count,
+  onStart,
+  onEdit,
+  onShowQr,
+  onMove,
+}: WorkoutCardProps) {
   const styles = useStyles();
   const colors = useColors();
   const { t } = useTranslation();
@@ -33,6 +43,12 @@ export function WorkoutCard({ workout, index, count, onStart, onEdit, onMove }: 
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => deleteWorkout(workout.id) },
     ]);
+
+  const exportFile = async () => {
+    if (!(await exportWorkoutFile(workout.id, t('transfer.shareTitle')))) {
+      Alert.alert(t('transfer.exportFailedTitle'), t('transfer.exportFailedMessage'));
+    }
+  };
 
   return (
     <Card variant="compact" style={styles.card}>
@@ -70,6 +86,8 @@ export function WorkoutCard({ workout, index, count, onStart, onEdit, onMove }: 
         title={workout.name}
         options={[
           { label: t('common.edit'), icon: 'edit', onPress: onEdit },
+          { label: t('transfer.exportFile'), icon: 'ios_share', onPress: exportFile },
+          { label: t('transfer.showQr'), icon: 'qr_code_2', onPress: onShowQr },
           {
             label: t('common.moveUp'),
             icon: 'arrow_upward',

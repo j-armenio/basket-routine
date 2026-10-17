@@ -1,6 +1,7 @@
 import { db } from '@/db/client';
 import * as routineRepo from '@/db/repositories/routines';
 import * as workoutRepo from '@/db/repositories/workouts';
+import type { WorkoutTransfer } from '@/domain/workoutTransfer';
 import { run } from '../dataStore';
 
 // Every routine and template write goes through here, like the session writes in
@@ -34,4 +35,9 @@ export function deleteWorkout(id: number) {
 /** Creates or edits a whole template in one transaction. */
 export function saveWorkout(input: workoutRepo.SaveWorkoutInput) {
   return run(() => workoutRepo.saveWorkout(db, input));
+}
+
+/** Adds an imported template to the routine (see `importWorkout` in the repository). */
+export function importWorkout(routineId: number, transfer: WorkoutTransfer) {
+  return run(() => workoutRepo.importWorkout(db, routineId, transfer));
 }

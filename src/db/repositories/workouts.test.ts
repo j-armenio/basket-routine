@@ -1,17 +1,20 @@
 /** @jest-environment node */
 import { DomainError } from '@/domain/errors';
 import type { TacticalBoard } from '@/domain/tacticalBoard';
+import type { WorkoutTransfer } from '@/domain/workoutTransfer';
 import { count, eq } from 'drizzle-orm';
 import { exercises, templateSets, workouts } from '../schema';
 import { seedExercises } from '../seed/seed';
 import { addWorkoutExercise, createTestDb, createWorkout } from '../test-utils';
 import { archiveCustomExercise, createCustomExercise } from './exercises';
-import { createRoutine } from './routines';
+import { archiveRoutine, createRoutine } from './routines';
 import { getSessionDetail, startSessionFromWorkout } from './sessions';
 import {
   archiveWorkout,
   getWorkoutWithExercises,
+  importWorkout,
   listWorkouts,
+  matchTransferExercises,
   reorderWorkouts,
   replaceWorkoutExercises,
   saveWorkout,
@@ -410,5 +413,116 @@ describe('archiving a custom exercise', () => {
         (e) => e.name,
       ),
     ).toEqual(['Figure 8', 'Crossover']);
+  });
+});
+
+describe('importWorkout', () => {
+  const board: TacticalBoard = { version: 1, elements: [{ type: 'x', at: [0.5, 0.5] }] };
+  const transferWith = (exercises: WorkoutTransfer['exercises']): WorkoutTransfer => ({
+    format: 'basket-routine/workout',
+    version: 1,
+    name: 'Imported',
+    exercises,
+  });
+  const freeThrows = {
+    exercise: { seedKey: 'free_throws' },
+    targetMode: 'makes' as const,
+    targets: [5, 10],
+    board,
+  };
+  const myDrill = (name = 'My drill') => ({
+    exercise: {
+      custom: {
+        name,
+        category: 'footwork' as const,
+        trackingType: 'check' as const,
+        description: 'Slide',
+      },
+    },
+    targetMode: null,
+    targets: [null],
+    board: null,
+  });
+
+  test('adds the template to the routine with its sets and board, after the existing workouts', () => {
+    const { db, routine } = setup();
+
+    const workout = importWorkout(db, routine.id, transferWith([freeThrows]));
+
+    const saved = getWorkoutWithExercises(db, workout.id)!;
+    expect(saved.name).toBe('Imported');
+    expect(saved.routineId).toBe(routine.id);
+    expect(saved.position).toBe(1);
+    expect(saved.exercises[0].exerciseId).toBe(exerciseId(db, 'free_throws'));
+    expect(saved.exercises[0].sets.map((set) => set.targetValue)).toEqual([5, 10]);
+    expect(saved.exercises[0].tacticalBoard).toEqual(board);
+  });
+
+  test('creates a custom exercise it does not have, and reuses an equal one the second time', () => {
+    const { db, routine } = setup();
+
+    importWorkout(db, routine.id, transferWith([myDrill()]));
+    importWorkout(db, routine.id, transferWith([myDrill('  my DRILL ')]));
+
+    const customs = db.select().from(exercises).where(eq(exercises.isCustom, true)).all();
+    expect(customs).toHaveLength(1);
+    expect(customs[0]).toMatchObject({ name: 'My drill', description: 'Slide', mediaUrl: null });
+  });
+
+  test('an unknown seedKey leaves nothing behind, not even the custom exercise made before it', () => {
+    const { db, routine } = setup();
+    const before = db.select({ n: count() }).from(workouts).get()!.n;
+
+    expect(
+      reasonOf(() =>
+        importWorkout(
+          db,
+          routine.id,
+          transferWith([myDrill(), { ...freeThrows, exercise: { seedKey: 'from_the_future' } }]),
+        ),
+      ),
+    ).toBe('unknown_exercise');
+
+    expect(db.select({ n: count() }).from(workouts).get()!.n).toBe(before);
+    expect(db.select().from(exercises).where(eq(exercises.isCustom, true)).all()).toHaveLength(0);
+  });
+
+  test('refuses a target mode that does not fit the predefined exercise', () => {
+    const { db, routine } = setup();
+
+    expect(
+      reasonOf(() =>
+        importWorkout(db, routine.id, transferWith([{ ...freeThrows, targetMode: null }])),
+      ),
+    ).toBe('target_mode_required');
+  });
+
+  test('refuses an archived routine', () => {
+    const { db } = setup();
+    const gone = createRoutine(db, 'Gone');
+    archiveRoutine(db, gone.id);
+
+    expect(reasonOf(() => importWorkout(db, gone.id, transferWith([freeThrows])))).toBe(
+      'not_found',
+    );
+  });
+
+  test('matchTransferExercises tells what exists, what would be created and what is unknown', () => {
+    const { db } = setup();
+
+    expect(
+      matchTransferExercises(
+        db,
+        transferWith([
+          freeThrows,
+          myDrill(),
+          { ...freeThrows, exercise: { seedKey: 'from_the_future' } },
+        ]),
+      ),
+    ).toEqual([
+      { kind: 'existing', exerciseId: exerciseId(db, 'free_throws'), name: 'Free Throws' },
+      { kind: 'new_custom' },
+      { kind: 'unknown' },
+    ]);
   });
 });

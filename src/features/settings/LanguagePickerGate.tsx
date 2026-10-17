@@ -17,7 +17,7 @@ type LanguagePickerGateProps = {
 };
 
 /**
- * Shown instead of the `Stack` on every launch: a title, the languages (each named in itself) and
+ * Shown instead of the `Stack` on the first launch, while no language is stored: a title, the languages (each named in itself) and
  * a confirm button. The stored language (English on the first launch) starts selected; the title
  * and the button follow the selection, read with a fixed `t` so the app's language only changes on
  * confirm. Not a routable screen.

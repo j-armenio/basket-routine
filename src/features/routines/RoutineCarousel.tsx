@@ -16,19 +16,21 @@ type RoutineCarouselProps = {
   index: number;
   onSelect: (index: number) => void;
   onRename: () => void;
+  onImport: () => void;
   onMove: (delta: -1 | 1) => void;
 };
 
 /**
  * The Workout tab's routine picker, kept quiet since routines rarely change: ‹ and › step to the
  * previous and next routine (a swipe changes the tab), the shown one's name with its menu (rename,
- * move left or right, delete), and a dot per routine marking where it is.
+ * import a workout, move left or right, delete), and a dot per routine marking where it is.
  */
 export function RoutineCarousel({
   routines,
   index,
   onSelect,
   onRename,
+  onImport,
   onMove,
 }: RoutineCarouselProps) {
   const styles = useStyles();
@@ -107,6 +109,7 @@ export function RoutineCarousel({
         title={routine.name}
         options={[
           { label: t('routines.rename'), icon: 'edit', onPress: onRename },
+          { label: t('transfer.importWorkout'), icon: 'download', onPress: onImport },
           {
             label: t('common.moveLeft'),
             icon: 'arrow_back',

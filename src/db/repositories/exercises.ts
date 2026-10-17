@@ -60,6 +60,40 @@ export function requireExercise(db: Db, id: number): Exercise {
   return exercise;
 }
 
+/** The active predefined exercise with this `seedKey`, if the app has one. */
+export function findExerciseBySeedKey(db: Db, seedKey: string): Exercise | undefined {
+  return db
+    .select()
+    .from(exercises)
+    .where(and(eq(exercises.seedKey, seedKey), isNull(exercises.archivedAt)))
+    .get();
+}
+
+/**
+ * An active custom exercise like this one: same category and tracking type, and the same name
+ * ignoring case and the spaces at the ends. Lets an imported workout reuse what is already there.
+ */
+export function findMatchingCustomExercise(
+  db: Db,
+  match: { name: string; category: Category; trackingType: TrackingType },
+): Exercise | undefined {
+  const name = match.name.trim().toLowerCase();
+  return db
+    .select()
+    .from(exercises)
+    .where(
+      and(
+        eq(exercises.isCustom, true),
+        isNull(exercises.archivedAt),
+        eq(exercises.category, match.category),
+        eq(exercises.trackingType, match.trackingType),
+      ),
+    )
+    .orderBy(asc(exercises.id))
+    .all()
+    .find((exercise) => exercise.name.trim().toLowerCase() === name);
+}
+
 /** An exercise that can still be added to templates and sessions. */
 export function requireActiveExercise(db: Db, id: number): Exercise {
   const exercise = requireExercise(db, id);

@@ -42,6 +42,11 @@ From the archived plan's former backlog section and the phases' out-of-scope lis
 - Drag & drop reordering for what still only has Move up / Move down: the workouts inside a
   routine (`WorkoutCard`'s menu). A template's exercises (`DraggableExerciseList`) already drag since Phase 9;
   routines (chips) move only through their menu's Move left / Move right.
+- Exporting and importing a single workout (JSON file or QR code) shipped. Not checked on a real
+  device yet (needs a new `preview` APK): the camera permission and scanner, the share sheet, and the
+  `basketroutine://import-workout?d=…` link opened by the system camera (no guarantee: many cameras
+  only open `http(s)` links). Tune `MAX_QR_LINK_LENGTH` (`src/domain/workoutTransfer.ts`) on a phone
+  with a drawing-heavy workout. Its `WorkoutTransfer` format is the natural piece of the backup below.
 - **JSON export / import backup**, asked for 2026-09-30 after Phase 9's Profile/Settings work: a
   real APK with months of history is now on the phone, Android Auto Backup (the original plan's accepted
   risk) is a best-effort fallback at most — its default 25 MB quota and its own schedule (wifi,

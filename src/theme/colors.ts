@@ -57,6 +57,9 @@ export const darkColors = {
   boardHalo: 'rgba(16, 36, 26, 0.85)',
   /** Behind the thumbnail's expand icon. */
   boardBadge: 'rgba(18, 18, 21, 0.7)',
+  /** A QR code: dark modules on a light ground, whatever the theme, so a camera can read it. */
+  qrForeground: '#121215',
+  qrBackground: '#FFFFFF',
   /** Behind modals (dialogs, action sheets). Not a text color. */
   scrim: 'rgba(0, 0, 0, 0.6)',
 };
@@ -64,8 +67,8 @@ export const darkColors = {
 export type ColorToken = keyof typeof darkColors;
 export type Palette = Record<ColorToken, string>;
 
-/** The light palette. The tactical board is a picture, not an app surface: its tokens (`court*`,
- *  `board*`) keep the dark values. */
+/** The light palette. The tactical board and a QR code are pictures, not app surfaces: their
+ *  tokens (`court*`, `board*`, `qr*`) keep the dark values. */
 export const lightColors: Palette = {
   ...darkColors,
   background: '#F5F6F8',

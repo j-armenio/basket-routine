@@ -1,6 +1,9 @@
 import { sql } from 'drizzle-orm';
-import { exercises } from '../schema';
+import { exercises, routines } from '../schema';
+import { createRoutine } from '../repositories/routines';
+import { importWorkout } from '../repositories/workouts';
 import type { Db } from '../types';
+import { DEFAULT_ROUTINE_NAME, DEFAULT_WORKOUTS } from './defaultWorkouts';
 import { SEED_EXERCISES } from './exercises';
 
 /**
@@ -26,5 +29,18 @@ export function seedExercises(db: Db): void {
         })
         .run();
     }
+  });
+}
+
+/**
+ * Gives a fresh install a routine with the starter workouts, in one transaction. Only when the
+ * database has never held a routine: routines are archived, never deleted, so one the person
+ * removed stays a row and the starters don't come back. Needs the exercise catalog seeded first.
+ */
+export function seedDefaultWorkouts(db: Db): void {
+  db.transaction((tx) => {
+    if (tx.select({ id: routines.id }).from(routines).limit(1).get()) return;
+    const routine = createRoutine(tx, DEFAULT_ROUTINE_NAME);
+    for (const workout of DEFAULT_WORKOUTS) importWorkout(tx, routine.id, workout);
   });
 }

@@ -16,6 +16,7 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
 // (`__files`), so tests can check what was copied into the app's storage and what was deleted.
 jest.mock('expo-file-system', () => {
   const files = new Set();
+  const contents = new Map();
   const join = (parts) =>
     parts
       .map((part) => (typeof part === 'string' ? part : part.uri))
@@ -31,8 +32,19 @@ jest.mock('expo-file-system', () => {
     copySync(target) {
       files.add(target.uri);
     }
+    create() {
+      files.add(this.uri);
+    }
+    write(text) {
+      files.add(this.uri);
+      contents.set(this.uri, text);
+    }
+    textSync() {
+      return contents.get(this.uri) ?? '';
+    }
     delete() {
       files.delete(this.uri);
+      contents.delete(this.uri);
     }
   }
   class Directory {
@@ -42,13 +54,36 @@ jest.mock('expo-file-system', () => {
     create() {}
   }
   const Paths = { document: new Directory('file:///docs'), cache: new Directory('file:///cache') };
-  return { __esModule: true, File, Directory, Paths, __files: files };
+  return { __esModule: true, File, Directory, Paths, __files: files, __contents: contents };
 });
 
 jest.mock('expo-image-picker', () => ({
   __esModule: true,
   launchImageLibraryAsync: jest.fn(async () => ({ canceled: true, assets: null })),
 }));
+
+// Sharing a workout file, choosing one to import and scanning a QR code: a test makes the picker
+// return a file (its content in the file-system mock's `__contents`) or fires `barcodeScanned` on
+// the camera view.
+jest.mock('expo-sharing', () => ({
+  __esModule: true,
+  isAvailableAsync: jest.fn(async () => true),
+  shareAsync: jest.fn(async () => {}),
+}));
+
+jest.mock('expo-document-picker', () => ({
+  __esModule: true,
+  getDocumentAsync: jest.fn(async () => ({ canceled: true, assets: null })),
+}));
+
+jest.mock('expo-camera', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    CameraView: (props) => <View testID="camera" onBarcodeScanned={props.onBarcodeScanned} />,
+    useCameraPermissions: jest.fn(() => [{ granted: true }, jest.fn()]),
+  };
+});
 
 // Renders the props that matter (`source`, `autoplay`) on a plain view.
 jest.mock('expo-image', () => {
@@ -127,13 +162,6 @@ jest.mock('expo-sqlite/kv-store', () => {
     },
   };
 });
-
-// The app asks for the language on every launch; the flow tests skip that picker (the language
-// test turns it back on), so they still open on the tabs.
-jest.mock('@/features/settings/launchGate', () => ({
-  __esModule: true,
-  askLanguageOnLaunch: jest.fn(() => false),
-}));
 
 // Every test renders through `useTranslation()` somewhere, but only `renderRouter('./app')`
 // tests go through the real root layout (the only place that imports this in the app itself).

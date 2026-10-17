@@ -66,7 +66,7 @@ describe.each(palettes)('%s palette', (_name, colors) => {
 
 test('the tactical board looks the same in both palettes', () => {
   const boardTokens = Object.keys(darkColors).filter(
-    (token) => token.startsWith('court') || token.startsWith('board'),
+    (token) => token.startsWith('court') || token.startsWith('board') || token.startsWith('qr'),
   ) as Token[];
   for (const token of boardTokens) expect(lightColors[token]).toBe(darkColors[token]);
 });

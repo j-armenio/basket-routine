@@ -1,6 +1,5 @@
 import Storage from 'expo-sqlite/kv-store';
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
-import { askLanguageOnLaunch } from '@/features/settings/launchGate';
 import i18n from '@/i18n/i18n';
 import { screen, userEvent } from '@testing-library/react-native';
 import { renderRouter } from 'expo-router/testing-library';
@@ -24,28 +23,21 @@ const renderApp = () => renderRouter('./app');
 
 beforeEach(() => {
   jest.mocked(useDatabaseSetup).mockReturnValue({ ready: true, error: null });
-  jest.mocked(askLanguageOnLaunch).mockReturnValue(true);
 });
 
 afterEach(() => {
   void i18n.changeLanguage('en');
 });
 
-test('the picker shows on every launch, with the stored language selected; confirming opens the tabs', async () => {
+test('with a stored language, the app opens on the tabs in it, with no picker', async () => {
   Storage.setItemSync('settings.language', 'pt-BR');
+  await i18n.changeLanguage('pt-BR');
   const app = renderApp();
   await app;
 
-  expect(screen.queryByRole('button', { name: 'Start Empty Workout' })).toBeNull();
-  expect(screen.getByRole('radio', { name: 'Português (Brasil)' })).toBeSelected();
-  expectAccessibleControls();
-
-  const user = setupUser();
-  await user.press(screen.getByRole('button', { name: 'Confirmar' }));
-
   expect(app.getPathname()).toBe('/');
-  expect(Storage.getItemSync('settings.language')).toBe('pt-BR');
   expect(screen.getByRole('button', { name: 'Iniciar Treino Vazio' })).toBeOnTheScreen();
+  expect(screen.queryByRole('button', { name: 'Confirmar' })).toBeNull();
 });
 
 test('with no stored language, the picker shows first; selecting one retitles it, confirming opens the tabs in it', async () => {

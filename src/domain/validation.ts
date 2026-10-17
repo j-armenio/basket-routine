@@ -9,7 +9,9 @@ export type ValidationReason =
   | 'target_mode_not_allowed'
   | 'value_not_allowed'
   | 'invalid_media'
-  | 'invalid_board';
+  | 'invalid_board'
+  | 'invalid_transfer'
+  | 'transfer_newer_version';
 
 export type ValidationResult = { ok: true } | { ok: false; reason: ValidationReason };
 

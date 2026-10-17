@@ -2,7 +2,6 @@ import { useBlurOnKeyboardHide } from '@/components/useBlurOnKeyboardHide';
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import { LanguagePickerGate } from '@/features/settings/LanguagePickerGate';
 import { readLanguage } from '@/features/settings/languageStorage';
-import { askLanguageOnLaunch } from '@/features/settings/launchGate';
 import '@/i18n/i18n';
 import { fontFiles } from '@/theme/fonts';
 import { useThemePreference } from '@/features/settings/hooks';
@@ -43,10 +42,8 @@ function RootContent({ preference }: { preference: ThemePreference }) {
   // one fails we carry on: text falls back to the system font, icons to their empty box.
   const [fontsLoaded, fontError] = useFonts({ ...fontFiles, [regular.name]: regular.font });
   const fontsSettled = fontsLoaded || !!fontError;
-  // The picker shows on every launch (the app already runs in the stored language behind it).
-  const [languageChosen, setLanguageChosen] = useState(
-    () => !askLanguageOnLaunch() && readLanguage() !== null,
-  );
+  // The picker shows only on the first launch, while no language is stored.
+  const [languageChosen, setLanguageChosen] = useState(() => readLanguage() !== null);
   useBlurOnKeyboardHide();
 
   // The native side follows the choice too: `Alert`s take the scheme, and the window background
@@ -101,6 +98,8 @@ function RootContent({ preference }: { preference: ThemePreference }) {
             />
             <Stack.Screen name="add-exercise" options={{ presentation: 'modal' }} />
             <Stack.Screen name="add-to-routine" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="workout-qr" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="import-workout" options={{ presentation: 'modal' }} />
           </Stack>
         )}
         <StatusBar style={statusBarStyle} />

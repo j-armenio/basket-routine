@@ -12,6 +12,7 @@ type RoutineWorkoutsProps = {
   routine: RoutineWithWorkouts;
   onNewWorkout: () => void;
   onEditWorkout: (workoutId: number) => void;
+  onShowQr: (workoutId: number) => void;
   onStartWorkout: (workoutId: number) => void;
 };
 
@@ -23,6 +24,7 @@ export function RoutineWorkouts({
   routine,
   onNewWorkout,
   onEditWorkout,
+  onShowQr,
   onStartWorkout,
 }: RoutineWorkoutsProps) {
   const { t } = useTranslation();
@@ -44,6 +46,7 @@ export function RoutineWorkouts({
           count={n}
           onStart={() => onStartWorkout(workout.id)}
           onEdit={() => onEditWorkout(workout.id)}
+          onShowQr={() => onShowQr(workout.id)}
           onMove={(delta) => moveWorkout(routine.id, moveItem(workoutIds, position, delta))}
         />
       ))}

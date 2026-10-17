@@ -121,6 +121,9 @@ export default function WorkoutScreen() {
             index={selectedIndex}
             onSelect={(index) => setSelectedId(routines[index].id)}
             onRename={() => setDialog({ kind: 'rename', routine: selected })}
+            onImport={() =>
+              router.push({ pathname: '/import-workout', params: { routineId: selected.id } })
+            }
             onMove={(delta) => {
               // Pinned, so the carousel keeps showing it as it moves, even if it was only the default.
               setSelectedId(selected.id);
@@ -145,6 +148,9 @@ export default function WorkoutScreen() {
               }
               onEditWorkout={(workoutId) =>
                 router.push({ pathname: '/edit-workout', params: { workoutId } })
+              }
+              onShowQr={(workoutId) =>
+                router.push({ pathname: '/workout-qr', params: { workoutId } })
               }
               onStartWorkout={(workoutId) =>
                 startTemplate(

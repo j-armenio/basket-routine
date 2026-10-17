@@ -12,7 +12,8 @@ export type DataReason =
   | 'invalid_order'
   | 'invalid_set_count'
   | 'empty_workout'
-  | 'media_not_saved';
+  | 'media_not_saved'
+  | 'unknown_exercise';
 
 export type DomainErrorReason = ValidationReason | DataReason;
 

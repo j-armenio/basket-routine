@@ -30,7 +30,15 @@
       ],
       "expo-sqlite",
       "expo-video",
-      "expo-image"
+      "expo-image",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Basket Routine uses the camera to scan the QR code of a workout.",
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
