@@ -8,6 +8,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useExercise } from './hooks';
 import { exerciseMedia, type MediaSource } from './mediaSource';
 import { MediaPlaceholder, MediaView } from './MediaView';
+import { useVideoThumbnail } from './videoThumbnail';
 
 type ExerciseThumbnailProps = {
   exerciseId: number;
@@ -74,8 +75,8 @@ export function ExerciseThumbnail({ exerciseId, name }: ExerciseThumbnailProps) 
   );
 }
 
-/** Portrait, like the bundled clips; `contain` fits any other shape inside it. */
-const FLOATING_ASPECT = 3 / 4;
+/** Tall portrait (9:16), like the bundled clips; `contain` fits any other shape inside it. */
+const FLOATING_ASPECT = 9 / 16;
 /** The most of the screen's height the floating box takes. */
 const FLOATING_MAX_HEIGHT = 0.75;
 
@@ -91,11 +92,18 @@ function FloatingMedia({
   const styles = useStyles();
   const { t } = useTranslation();
   const window = useWindowDimensions();
+  // A video's box takes the video's own shape (from its first frame, already made for the card's
+  // still). In a box of another shape, ExoPlayer has to center the picture itself once it learns the
+  // video's size, and on a first open that comes after the layout: the video showed stretched to one
+  // side until it had been opened a few times.
+  const frame = useVideoThumbnail(media.kind === 'video' ? media.source : undefined);
+  const aspect =
+    frame && frame.width > 0 && frame.height > 0 ? frame.width / frame.height : FLOATING_ASPECT;
   const width = Math.min(
     window.width - 2 * spacing.screenPadding,
-    window.height * FLOATING_MAX_HEIGHT * FLOATING_ASPECT,
+    window.height * FLOATING_MAX_HEIGHT * aspect,
   );
-  const box = { width, height: width / FLOATING_ASPECT };
+  const box = { width, height: width / aspect };
   const pinned = mode === 'pinned';
   return (
     <Modal

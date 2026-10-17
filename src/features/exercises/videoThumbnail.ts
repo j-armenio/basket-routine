@@ -1,3 +1,4 @@
+import { Asset } from 'expo-asset';
 import { createVideoPlayer, type VideoThumbnail } from 'expo-video';
 import { useEffect, useState } from 'react';
 
@@ -19,18 +20,32 @@ export function thumbnailSource(source: number | string): number | string {
   }
 }
 
-function loadThumbnail(source: number | string): Promise<VideoThumbnail | null> {
+/**
+ * A bundled video (a `require` number) as a local file. In a release build the asset is a raw
+ * resource name with no scheme: expo-video can play it, but its frame reader only takes a file, a
+ * content or a remote URI, so the first frame could never be made. `expo-asset` copies it into the
+ * cache (in dev, it downloads Metro's URL) and hands back that file's URI.
+ */
+async function framesSource(source: number | string): Promise<number | string> {
+  if (typeof source === 'string') return thumbnailSource(source);
+  const [asset] = await Asset.loadAsync(source);
+  if (!asset?.localUri) throw new Error('Bundled video has no local file');
+  return thumbnailSource(asset.localUri);
+}
+
+export function loadThumbnail(source: number | string): Promise<VideoThumbnail | null> {
   let pending = cache.get(source);
   if (!pending) {
     pending = (async () => {
-      const player = createVideoPlayer(thumbnailSource(source));
+      let player: ReturnType<typeof createVideoPlayer> | undefined;
       try {
+        player = createVideoPlayer(await framesSource(source));
         const [thumbnail] = await player.generateThumbnailsAsync(0);
         return thumbnail ?? null;
       } catch {
         return null;
       } finally {
-        player.release();
+        player?.release();
       }
     })();
     cache.set(source, pending);
@@ -38,14 +53,20 @@ function loadThumbnail(source: number | string): Promise<VideoThumbnail | null> 
   return pending;
 }
 
-/** The first frame of a video: `undefined` while it loads, `null` when it can't be made. */
-export function useVideoThumbnail(source: number | string): VideoThumbnail | null | undefined {
+/**
+ * The first frame of a video: `undefined` while it loads (or with no source, for media that isn't a
+ * video), `null` when it can't be made.
+ */
+export function useVideoThumbnail(
+  source: number | string | undefined,
+): VideoThumbnail | null | undefined {
   const [loaded, setLoaded] = useState<{
     source: number | string;
     thumbnail: VideoThumbnail | null;
   }>();
 
   useEffect(() => {
+    if (source === undefined) return;
     let live = true;
     loadThumbnail(source).then((thumbnail) => {
       if (live) setLoaded({ source, thumbnail });
@@ -55,5 +76,5 @@ export function useVideoThumbnail(source: number | string): VideoThumbnail | nul
     };
   }, [source]);
 
-  return loaded?.source === source ? loaded.thumbnail : undefined;
+  return source !== undefined && loaded?.source === source ? loaded.thumbnail : undefined;
 }
