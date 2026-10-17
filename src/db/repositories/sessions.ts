@@ -1,5 +1,6 @@
 import { DEFAULT_TARGET_VALUE } from '@/domain/defaults';
 import { DomainError } from '@/domain/errors';
+import { totalPausedMs } from '@/domain/sessionTime';
 import { summarizeSession } from '@/domain/summary';
 import { validateBoard, type TacticalBoard } from '@/domain/tacticalBoard';
 import type { SessionSummary } from '@/domain/summary';
@@ -331,13 +332,39 @@ export function updateSessionSet(db: Db, setId: number, patch: SessionSetPatch):
   });
 }
 
-/** Marks the session finished and returns its summary. */
+/** Stops the session's timer; already paused, it stays as it is. */
+export function pauseSession(db: Db, id: number): void {
+  const session = requireInProgressSession(db, id);
+  if (session.pausedAt) return;
+  db.update(sessions).set({ pausedAt: new Date() }).where(eq(sessions.id, id)).run();
+}
+
+/** Starts the paused timer again, adding the pause to `pausedMs`; running, nothing changes. */
+export function resumeSession(db: Db, id: number): void {
+  const session = requireInProgressSession(db, id);
+  if (!session.pausedAt) return;
+  db.update(sessions)
+    .set({ pausedAt: null, pausedMs: totalPausedMs(session, new Date()) })
+    .where(eq(sessions.id, id))
+    .run();
+}
+
+/**
+ * Marks the session finished and returns its summary. A pause under way ends at the finish, so
+ * `pausedMs` holds all the time spent paused.
+ */
 export function finishSession(db: Db, id: number): SessionSummary {
   return db.transaction((tx) => {
-    requireInProgressSession(tx, id);
+    const session = requireInProgressSession(tx, id);
     if (!getSessionDetail(tx, id)?.exercises.length) throw new DomainError('empty_workout');
+    const now = new Date();
     tx.update(sessions)
-      .set({ status: 'finished', finishedAt: new Date() })
+      .set({
+        status: 'finished',
+        finishedAt: now,
+        pausedAt: null,
+        pausedMs: totalPausedMs(session, now),
+      })
       .where(eq(sessions.id, id))
       .run();
     const detail = getSessionDetail(tx, id);

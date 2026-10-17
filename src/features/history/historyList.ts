@@ -1,15 +1,14 @@
 import { fgBand, fgRatio, type FgBand } from '@/domain/fg';
 import { formatFgPct, formatMonth, formatShortDate } from '@/domain/format';
+import { sessionDurationMs, type SessionTiming } from '@/domain/sessionTime';
 import { summarizeSession } from '@/domain/summary';
 import type { SessionSummary, ShootingTotals, SummaryExercise } from '@/domain/summary';
 import type { TFunction } from 'i18next';
 
 /** What a finished session needs to become a History row (`listFinishedSessionsWithExercises`). */
-interface FinishedSession {
+interface FinishedSession extends SessionTiming {
   id: number;
   name: string;
-  startedAt: Date;
-  finishedAt: Date | null;
   exercises: (SummaryExercise & { name: string })[];
 }
 
@@ -32,7 +31,7 @@ export function toHistoryItem(session: FinishedSession): HistoryItem {
     id: session.id,
     name: session.name,
     startedAt: session.startedAt,
-    durationMs: session.finishedAt ? session.finishedAt.getTime() - session.startedAt.getTime() : 0,
+    durationMs: sessionDurationMs(session),
     exerciseNames: session.exercises.map((exercise) => exercise.name),
     summary: summarizeSession(session.exercises),
   };

@@ -354,6 +354,26 @@ test('the header counts the time since the start, also after minimizing', async 
   expect(screen.getByRole('timer', { name: /^Elapsed time 02:0\d$/ })).toBeOnTheScreen();
 });
 
+test('the button beside the timer pauses it and resumes it, the pause left out', async () => {
+  await launch();
+  const user = setupUser();
+  await startWorkout(user);
+  await act(() => jest.advanceTimersByTime(30_000));
+
+  await user.press(screen.getByRole('button', { name: 'Pause timer' }));
+  expect(screen.getByRole('timer', { name: /^Elapsed time 00:3\d, paused$/ })).toBeOnTheScreen();
+  expectAccessibleControls();
+  await act(() => jest.advanceTimersByTime(5 * 60_000));
+  expect(screen.getByRole('timer', { name: /^Elapsed time 00:3\d, paused$/ })).toBeOnTheScreen();
+
+  await user.press(screen.getByRole('button', { name: 'Resume timer' }));
+  expect(session().pausedAt).toBeNull();
+  expect(session().pausedMs).toBeGreaterThanOrEqual(5 * 60_000);
+  await act(() => jest.advanceTimersByTime(60_000));
+  expect(screen.getByRole('timer', { name: /^Elapsed time 01:3\d$/ })).toBeOnTheScreen();
+  expect(screen.getByRole('button', { name: 'Pause timer' })).toBeOnTheScreen();
+});
+
 test('finish: confirmation, then the summary, then Done', async () => {
   const app = await launch();
   const user = setupUser();

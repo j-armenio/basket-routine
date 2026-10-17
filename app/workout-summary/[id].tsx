@@ -6,6 +6,7 @@ import { fgTone } from '@/components/fgTone';
 import { Screen } from '@/components/Screen';
 import { fgBand } from '@/domain/fg';
 import { formatFgPct, formatWorkoutDate } from '@/domain/format';
+import { sessionDurationMs } from '@/domain/sessionTime';
 import { summarizeExercise, summarizeSession } from '@/domain/summary';
 import { SessionTotals } from '@/features/history/SessionTotals';
 import { useLanguage } from '@/features/settings/hooks';
@@ -39,7 +40,7 @@ export default function WorkoutSummaryScreen() {
   }
 
   const summary = summarizeSession(detail.exercises);
-  const duration = detail.finishedAt ? detail.finishedAt.getTime() - detail.startedAt.getTime() : 0;
+  const duration = sessionDurationMs(detail);
 
   return (
     <Screen

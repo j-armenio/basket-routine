@@ -2,6 +2,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { formatWorkoutDate } from '@/domain/format';
+import { sessionDurationMs } from '@/domain/sessionTime';
 import { summarizeSession } from '@/domain/summary';
 import { deleteSession } from '@/features/history/actions';
 import { useFinishedSession } from '@/features/history/hooks';
@@ -50,9 +51,7 @@ export default function SessionDetailScreen() {
   }
 
   const date = formatWorkoutDate(session.startedAt, locale);
-  const duration = session.finishedAt
-    ? session.finishedAt.getTime() - session.startedAt.getTime()
-    : 0;
+  const duration = sessionDurationMs(session);
 
   const remove = () => {
     const result = deleteSession(session.id);

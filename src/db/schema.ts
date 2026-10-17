@@ -112,6 +112,10 @@ export const sessions = sqliteTable(
     status: text('status', { enum: SESSION_STATUSES }).notNull(),
     startedAt: timestamp('started_at').notNull(),
     finishedAt: timestamp('finished_at'),
+    /** When the timer was paused; null while it runs. */
+    pausedAt: timestamp('paused_at'),
+    /** The time spent paused before `pausedAt`, left out of the duration (`src/domain/sessionTime.ts`). */
+    pausedMs: integer('paused_ms').notNull().default(0),
   },
   (t) => [
     check('sessions_status_check', sql`${t.status} in (${inList(SESSION_STATUSES)})`),

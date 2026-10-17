@@ -8,8 +8,10 @@ import {
   finishSession,
   getSessionDetail,
   overwriteWorkoutFromSession,
+  pauseSession,
   removeSessionExercise,
   reorderSessionExercises,
+  resumeSession,
   startEmptySession,
   startSessionFromWorkout,
   updateSessionExerciseBoard,
@@ -72,6 +74,11 @@ export function deleteSet(setId: number) {
 
 export function updateSet(setId: number, patch: SessionSetPatch) {
   return run(() => updateSessionSet(db, setId, patch));
+}
+
+/** Pauses or resumes the workout's timer. */
+export function setTimerPaused(sessionId: number, paused: boolean) {
+  return run(() => (paused ? pauseSession(db, sessionId) : resumeSession(db, sessionId)));
 }
 
 export function finishWorkout(sessionId: number) {

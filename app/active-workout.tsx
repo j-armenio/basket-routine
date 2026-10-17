@@ -1,6 +1,5 @@
 import { BottomActionBar } from '@/components/BottomActionBar';
 import { Button } from '@/components/Button';
-import { ElapsedTimer } from '@/components/ElapsedTimer';
 import { EmptyState } from '@/components/EmptyState';
 import { IconButton } from '@/components/IconButton';
 import { haptics } from '@/components/haptics';
@@ -15,6 +14,7 @@ import {
 import { ExerciseCard } from '@/features/workout/ExerciseCard';
 import { useInProgressSession, useSessionDetail } from '@/features/workout/hooks';
 import { leaveScreen } from '@/features/workout/navigation';
+import { WorkoutTimer } from '@/features/workout/WorkoutTimer';
 import { moveItem } from '@/domain/order';
 import { countEmptySets, hasLoggedData, summarizeSession } from '@/domain/summary';
 import i18n from '@/i18n/i18n';
@@ -118,7 +118,7 @@ export default function ActiveWorkoutScreen() {
           onPress={() => leaveScreen(router)}
         />
       }
-      right={<ElapsedTimer start={session.startedAt} />}
+      right={<WorkoutTimer session={session} />}
       footer={<BottomActionBar label={t('workout.finishWorkout')} icon="check" onPress={finish} />}
       bottomInset
       keyboardAvoiding

@@ -13,7 +13,7 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 | `/exercises` | `app/(tabs)/exercises.tsx` | Aba Exercises: busca + cards de categoria (5 categorias + Custom) |
 | `/profile` | `app/(tabs)/profile.tsx` | Aba Profile: botão de Settings, perfil, estatísticas, gráfico de FG%, últimas 5 sessões |
 | — | `app/(tabs)/_layout.tsx` | Abas (`js-top-tabs` com a barra embaixo, swipe entre abas, `ResumeBanner`) |
-| `/active-workout` | `app/active-workout.tsx` | Treino em andamento (timer, cards de exercício, Finish) |
+| `/active-workout` | `app/active-workout.tsx` | Treino em andamento (timer com pausa, cards de exercício, Finish) |
 | `/add-exercise` | `app/add-exercise.tsx` | Modal de escolha de exercício (`?to=template` adiciona ao rascunho) |
 | `/add-to-routine` | `app/add-to-routine.tsx` | Modal: escolhe um workout (ou cria um) e o modo do arremesso |
 | `/edit-workout` | `app/edit-workout.tsx` | Editor de template (`?routineId=` cria, `?workoutId=` edita) |
@@ -41,6 +41,7 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 | `exerciseStats.ts` | Estatísticas de um exercício ao longo das sessões |
 | `template.ts` | Estrutura comum de template e sessão (detecta se a estrutura mudou no Finish) |
 | `tacticalBoard.ts` | Modelo da prancheta (pontos normalizados, elementos), regras e comparação |
+| `sessionTime.ts` | Tempo do cronômetro sem as pausas (`elapsedMs`, `sessionDurationMs`, `totalPausedMs`) |
 | `format.ts` | Formatação de FG%, contagens, timer, `durationParts` e datas (recebem `locale`); sem palavras em inglês |
 | `media.ts` | Tipo de mídia pela extensão, limite de vídeo |
 | `defaults.ts` | Metas padrão, `timeOfDay` (manhã/tarde/noite, sem o nome em si) |
@@ -59,7 +60,7 @@ números acima em palavras.
 | `types.ts` | Tipo `Db` (serve para expo-sqlite, better-sqlite3 e `tx`) e tipos das linhas |
 | `client.ts` | Abre `basket-routine.db` no aparelho |
 | `useDatabaseSetup.ts` | Roda as migrations e o seed na inicialização |
-| `migrations/` | Gerado pelo `drizzle-kit` (`0000`–`0003`); somente acréscimo, nunca editar |
+| `migrations/` | Gerado pelo `drizzle-kit` (`0000`–`0004`); somente acréscimo, nunca editar |
 | `seed/` | Os 48 exercícios predefinidos (`exercises.ts`) e o upsert por `seedKey` (`seed.ts`); os dois workouts iniciais (`defaultWorkouts.ts`), criados por `seedDefaultWorkouts` só se o banco nunca teve uma rotina |
 | `repositories/` | Funções `(db, ...)` por agregado: `exercises`, `routines`, `workouts`, `sessions` (+ `common.ts`) |
 | `test-utils.ts` | `createTestDb()`: banco em memória com as migrations reais |
@@ -84,7 +85,7 @@ versão, `run`, `ActionResult`).
 
 | Pasta | Conteúdo |
 |---|---|
-| `workout/` | Treino ativo: `ExerciseCard`, linhas de set (`ShootingSetRow`, `CheckSetRow`, `SetNumber`), `useNumberCell` + `setDraft` (salvar a cada tecla, desfazer no blur), `setTable` (colunas), `SetTableHeader`, `ExerciseNote`, `ResumeBanner`, `TargetModeSheet`, `navigation.ts` (`leaveScreen`) |
+| `workout/` | Treino ativo: `ExerciseCard`, linhas de set (`ShootingSetRow`, `CheckSetRow`, `SetNumber`), `useNumberCell` + `setDraft` (salvar a cada tecla, desfazer no blur), `setTable` (colunas), `SetTableHeader`, `ExerciseNote`, `ResumeBanner`, `TargetModeSheet`, `WorkoutTimer` (cronômetro + botão de pausar/retomar no cabeçalho), `navigation.ts` (`leaveScreen`) |
 | `routines/` | Rotinas e templates: `RoutineCarousel` (seletor de rotina da aba Workout), `RoutineWorkouts` (os workouts da rotina mostrada), `WorkoutCard`, `RoutineChoiceSection`, exportar/importar (`workoutTransfer.ts`: arquivo, prévia, `QrCode`), lista arrastável de exercícios (`DraggableExerciseList`), o editor (`templateDraft.ts`, `draftStore.ts`, `loadDraft.ts`, `TemplateExerciseCard`, `TemplateSetRow`) |
 | `history/` | Histórico: `historyList.ts` (itens, agrupamento por mês, dados do gráfico, estatísticas do perfil), `HistoryRow`, `MonthHeader`, `SessionTotals`, `SessionExerciseView`, `FgChart`, `FgEvolutionCard` |
 | `exercises/` | Catálogo: `catalogList.ts`, `CategoryCard` + `categoryImages.ts`, `ExerciseList`, `ExerciseRow`, `ExerciseThumbnail` (a mídia no cabeçalho dos cards do treino ativo e do editor de template), `ExerciseStatsCard`, mídia (`MediaView`, `mediaSource`, `mediaFiles`, `seedMedia`, `videoThumbnail`) |

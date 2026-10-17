@@ -21,8 +21,10 @@ import {
   listExerciseResults,
   listFinishedSessionsWithExercises,
   overwriteWorkoutFromSession,
+  pauseSession,
   removeSessionExercise,
   reorderSessionExercises,
+  resumeSession,
   startEmptySession,
   startSessionFromWorkout,
   updateSessionExerciseBoard,
@@ -392,6 +394,38 @@ describe('finishing and discarding', () => {
     expect(finished[0]).toMatchObject({ id: session.id, status: 'finished' });
     expect(finished[0].finishedAt).toBeInstanceOf(Date);
     expect(getInProgressSession(db)).toBeUndefined();
+  });
+
+  test('pausing and resuming add the time paused to pausedMs, and Finish ends a pause', () => {
+    jest.useFakeTimers({ now: new Date(2026, 9, 17, 10, 0) });
+    try {
+      const { db } = setup();
+      const session = startEmptySession(db, 'Paused');
+      addSessionExercise(db, session.id, exerciseId(db, 'figure_8'));
+      const timing = () => getInProgressSession(db) ?? detailOf(db, session.id);
+
+      jest.advanceTimersByTime(10 * 60_000);
+      pauseSession(db, session.id);
+      expect(timing()).toMatchObject({ pausedAt: new Date(2026, 9, 17, 10, 10), pausedMs: 0 });
+      jest.advanceTimersByTime(60_000);
+      pauseSession(db, session.id); // already paused: the pause keeps its start
+      expect(timing().pausedAt).toEqual(new Date(2026, 9, 17, 10, 10));
+
+      jest.advanceTimersByTime(4 * 60_000);
+      resumeSession(db, session.id);
+      expect(timing()).toMatchObject({ pausedAt: null, pausedMs: 5 * 60_000 });
+      resumeSession(db, session.id); // running: nothing changes
+      expect(timing().pausedMs).toBe(5 * 60_000);
+
+      jest.advanceTimersByTime(20 * 60_000);
+      pauseSession(db, session.id);
+      jest.advanceTimersByTime(3 * 60_000);
+      finishSession(db, session.id);
+      expect(timing()).toMatchObject({ pausedAt: null, pausedMs: 8 * 60_000 });
+      expect(reasonOf(() => pauseSession(db, session.id))).toBe('session_not_in_progress');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   test('a finished session frees the in-progress slot', () => {

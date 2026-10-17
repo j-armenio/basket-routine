@@ -47,6 +47,8 @@ describe('toHistoryItem', () => {
       name: 'Morning Workout',
       startedAt: started,
       finishedAt: new Date(started.getTime() + 42 * 60_000),
+      pausedAt: null,
+      pausedMs: 0,
       exercises: [
         {
           name: 'Free Throws',
@@ -84,6 +86,8 @@ describe('toHistoryItem', () => {
       name: 'X',
       startedAt: started,
       finishedAt: null,
+      pausedAt: null,
+      pausedMs: 0,
       exercises: [],
     });
     expect(result.durationMs).toBe(0);
