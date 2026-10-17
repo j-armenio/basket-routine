@@ -5,7 +5,7 @@ import type { FontWeight } from '@/theme/fonts';
 import { border, opacity, radius, size, spacing } from '@/theme/spacing';
 import type { TypographyVariant } from '@/theme/typography';
 import type { AndroidSymbol } from 'expo-symbols';
-import { Pressable, type PressableProps, type ViewStyle } from 'react-native';
+import { Pressable, type Insets, type PressableProps, type ViewStyle } from 'react-native';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 
@@ -24,6 +24,8 @@ type Variant =
   | 'outline'
   /** The gray outline, a quiet action inside a card (Edit Profile). */
   | 'bordered'
+  /** `ghost` a little shorter, with its hit area padded back to 48 dp (Add Set in the active workout). */
+  | 'ghostCompact'
   /** Text only, in a header (the tactical board's Cancel). */
   | 'text'
   /** A primary button sized for a header (the tactical board's Save). */
@@ -35,6 +37,8 @@ type VariantStyle = {
   text: TypographyVariant;
   weight?: FontWeight;
   iconSize: number;
+  /** Extra hit area around a button drawn smaller than `size.minTouchTarget`. */
+  hitSlop?: Insets;
 };
 
 // Built once per palette, since the colors differ by theme.
@@ -79,6 +83,17 @@ const buildVariants = (colors: Palette): Record<Variant, VariantStyle> => ({
     text: 'bodySmall',
     weight: 'bold',
     iconSize: size.iconButtonGlyph,
+  },
+  ghostCompact: {
+    container: { minHeight: size.compactButtonHeight, borderRadius: radius.input },
+    textColor: colors.primary,
+    text: 'bodySmall',
+    weight: 'bold',
+    iconSize: size.iconButtonGlyph,
+    hitSlop: {
+      top: (size.minTouchTarget - size.compactButtonHeight) / 2,
+      bottom: (size.minTouchTarget - size.compactButtonHeight) / 2,
+    },
   },
   danger: {
     container: {
@@ -178,6 +193,7 @@ export function Button({
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
       disabled={disabled}
+      hitSlop={config.hitSlop}
       {...props}
       style={({ pressed }) => [
         styles.base,

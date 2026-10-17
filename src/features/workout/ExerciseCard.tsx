@@ -126,7 +126,7 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
         </AppText>
       )}
       <Button
-        variant="ghost"
+        variant="ghostCompact"
         icon="add"
         label={t('workout.addSet')}
         fullWidth

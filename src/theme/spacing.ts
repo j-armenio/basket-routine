@@ -44,6 +44,8 @@ export const size = {
   buttonPrimaryHeight: 56,
   inputHeight: 52,
   chipHeight: 48,
+  /** A compact button's drawn height; its hit area is padded back up to `minTouchTarget`. */
+  compactButtonHeight: 40,
   iconButton: 48,
   /** The outlined icon button's ring, inside its 48 dp target. */
   iconButtonRing: 36,
