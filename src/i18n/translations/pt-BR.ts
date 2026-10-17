@@ -215,6 +215,7 @@ const ptBR: typeof en = {
     done: 'Feito',
     sessions: 'Sessões',
     holdToPlay: 'Segure para reproduzir a mídia',
+    playMediaFor: 'Reproduzir mídia de {{name}}',
     editExerciseTitle: 'Editar Exercício',
     newExerciseTitle: 'Novo Exercício',
     notFoundTitle: 'Exercício não encontrado',

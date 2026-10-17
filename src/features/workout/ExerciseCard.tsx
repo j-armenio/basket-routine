@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, View } from 'react-native';
+import { ExerciseThumbnail } from '../exercises/ExerciseThumbnail';
 import { TacticalBoardSlot } from '../tacticalBoard/TacticalBoardSlot';
 import { addSet, removeExercise, setBoard } from './actions';
 import { CheckSetRow } from './CheckSetRow';
@@ -68,6 +69,7 @@ export function ExerciseCard({ exercise, index, count, onMove }: ExerciseCardPro
   return (
     <Card variant="compact" style={styles.card}>
       <View style={styles.header}>
+        <ExerciseThumbnail exerciseId={exercise.exerciseId} name={exercise.name} />
         <View style={styles.titles}>
           <AppText variant="cardTitle">{exercise.name}</AppText>
           <AppText variant="caption" tone="secondary">
@@ -175,15 +177,15 @@ const useStyles = makeStyles((colors) => ({
   card: {
     paddingRight: spacing.md,
   },
+  // The thumbnail, the titles and the icon buttons, centered on one line.
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   titles: {
     flex: 1,
     gap: spacing.xxs,
-    paddingTop: spacing.xs,
   },
   table: {
     gap: spacing.sm,

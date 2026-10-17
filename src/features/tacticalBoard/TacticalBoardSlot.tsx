@@ -17,7 +17,8 @@ type TacticalBoardSlotProps = {
   /** Opens the editor. Absent: read only (History). */
   onOpen?: () => void;
   /**
-   * `card` (default): full width, below the header, a badge opens the editor. `icon`: a 48 dp
+   * `card` (default): below the header, centered, at most `size.boardThumbnailMax` wide; a badge
+   * opens the editor. `icon`: a 48 dp
    * thumbnail sized like a header icon button, replacing the "add board" one once there is a
    * board (the template editor).
    */
@@ -72,7 +73,12 @@ export function TacticalBoardSlot({
 
   if (!onOpen) {
     return (
-      <View accessible accessibilityRole="image" accessibilityLabel={describeBoard(t, board)}>
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={describeBoard(t, board)}
+        style={styles.cardSlot}
+      >
         {drawing}
       </View>
     );
@@ -83,7 +89,7 @@ export function TacticalBoardSlot({
       accessibilityLabel={t('tactical.openFor', { name: exerciseName })}
       accessibilityHint={describeBoard(t, board)}
       onPress={onOpen}
-      style={({ pressed }) => pressed && styles.pressed}
+      style={({ pressed }) => [styles.cardSlot, pressed && styles.pressed]}
     >
       {drawing}
       <View style={styles.badge}>
@@ -101,6 +107,12 @@ const useStyles = makeStyles((colors) => ({
     borderColor: colors.courtFrame,
     backgroundColor: colors.court,
     overflow: 'hidden',
+  },
+  // Centered in the card, a little narrower than it.
+  cardSlot: {
+    width: '100%',
+    maxWidth: size.boardThumbnailMax,
+    alignSelf: 'center',
   },
   // A header icon button's footprint, the (slightly shorter) court frame centered inside it.
   iconTouch: {

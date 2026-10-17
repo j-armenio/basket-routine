@@ -243,6 +243,32 @@ test('exercises: move one up and remove another after confirming', async () => {
   expect(names()).toEqual(['Figure 8']);
 });
 
+test("an exercise card's media floats: a tap keeps it open, a hold only while held", async () => {
+  const app = await launch();
+  const user = setupUser();
+  await startWorkout(user);
+  await addExerciseByName(user, 'Free Throws', 'attempts');
+  const thumbnail = screen.getByRole('button', { name: 'Play Free Throws media' });
+
+  // A tap: it stays, closed by its ✕ or by a tap outside, and the workout stays on screen.
+  await user.press(thumbnail);
+  expect(screen.getByTestId('floating-media')).toBeOnTheScreen();
+  expect(app.getPathname()).toBe('/active-workout');
+  expectAccessibleControls();
+  await user.press(screen.getByRole('button', { name: 'Close' }));
+  expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
+  await user.press(thumbnail);
+  await user.press(screen.getByRole('button', { name: 'Close dialog' }));
+  expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
+
+  // A hold: open with no ✕ while held, gone on release.
+  await act(async () => fireEvent(thumbnail, 'longPress'));
+  expect(screen.getByTestId('floating-media')).toBeOnTheScreen();
+  expect(screen.queryByRole('button', { name: 'Close' })).not.toBeOnTheScreen();
+  await act(async () => fireEvent(thumbnail, 'pressOut'));
+  expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
+});
+
 test('the picker searches by part of the name and the close button adds nothing', async () => {
   const app = await launch();
   const user = setupUser();

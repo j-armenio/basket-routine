@@ -89,6 +89,8 @@ export const size = {
   boardAction: 48,
   /** The expand icon's square on the thumbnail. */
   boardBadge: 32,
+  /** The widest the board's thumbnail gets in a workout card (narrower cards fill their width). */
+  boardThumbnailMax: 260,
 };
 
 /**

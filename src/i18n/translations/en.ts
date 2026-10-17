@@ -238,6 +238,7 @@ const en = {
     done: 'Done',
     sessions: 'Sessions',
     holdToPlay: 'Hold to play its media',
+    playMediaFor: 'Play {{name}} media',
     editExerciseTitle: 'Edit Exercise',
     newExerciseTitle: 'New Exercise',
     notFoundTitle: 'Exercise not found',

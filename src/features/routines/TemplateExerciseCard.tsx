@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { ExerciseThumbnail } from '../exercises/ExerciseThumbnail';
 import { TacticalBoardSlot } from '../tacticalBoard/TacticalBoardSlot';
 import { SetTableHeader, modeSubtitle } from '../workout/SetTableHeader';
 import { updateDraft } from './draftStore';
@@ -89,9 +90,13 @@ export function TemplateExerciseCard({
   return (
     <Card variant="compact" style={styles.card}>
       <View style={styles.header}>
+        <ExerciseThumbnail exerciseId={exercise.exerciseId} name={exercise.name} />
         <GestureDetector gesture={drag}>
           <View style={styles.titles}>
-            <AppText variant="cardTitle">{exercise.name}</AppText>
+            {/* A step smaller than the active workout's: the editor's header is busier. */}
+            <AppText variant="body" weight="bold">
+              {exercise.name}
+            </AppText>
             <AppText variant="caption" tone="secondary">
               {modeSubtitle(t, exercise.targetMode)}
             </AppText>
@@ -183,15 +188,15 @@ const useStyles = makeStyles((colors) => ({
   card: {
     paddingRight: spacing.md,
   },
+  // The thumbnail, the titles and the icon buttons, centered on one line.
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
   },
   titles: {
     flex: 1,
     gap: spacing.xxs,
-    paddingTop: spacing.xs,
   },
   table: {
     gap: spacing.sm,
