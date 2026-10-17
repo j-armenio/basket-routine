@@ -35,7 +35,7 @@ export function WorkoutCard({ workout, index, count, onStart, onEdit, onMove }: 
     ]);
 
   return (
-    <Card variant="raised" style={styles.card}>
+    <Card variant="compact" style={styles.card}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('routines.editName', { name: workout.name })}

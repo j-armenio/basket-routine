@@ -91,6 +91,8 @@ export const size = {
   boardBadge: 32,
   /** The widest the board's thumbnail gets in a workout card (narrower cards fill their width). */
   boardThumbnailMax: 260,
+  /** A dot of the Workout tab's routine carousel. */
+  carouselDot: 6,
 };
 
 /**

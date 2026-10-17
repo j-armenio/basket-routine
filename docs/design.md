@@ -33,9 +33,9 @@ Units: 1 px of the mockups = 1 dp; reference width 390 dp. Screens scroll; the t
 | `primary` | `#F47C98` | Main actions (Start Empty Workout, Finish Workout, Save, Save Exercise, Done, Add to Routine, the FAB, Add Set), the chart line |
 | `onPrimary` | `#1E1E24` | Text and icons on `primary` (≈ 6.5:1) |
 | `primaryContainer` | `#3A2830` | Behind the round play button (icon in `primary`) |
-| `secondary` | `#2B5840` | Selected chips (the Workout tab's routines too), the active tab's pill, a done check box, the timer |
+| `secondary` | `#2B5840` | Selected chips, the active tab's pill, a done check box, the timer |
 | `onSecondary` | `#F5F6F8` | Text and icons on `secondary` (≈ 7.5:1) |
-| `secondaryOutline` | `#4E8F6B` | Green outlines: the logged number field, New Workout (dashed), Choose media, selected chips |
+| `secondaryOutline` | `#4E8F6B` | Green outlines: the logged number field, New Workout (dashed), Choose media, selected chips; the routine carousel's current dot |
 | `secondaryText` | `#A8D5BA` | Green text: the active tab's label, New Workout, the Custom tag, "Workout in progress" |
 | `success` | `#7FD1A0` | FG% above 60%, a done check in history |
 | `error` | `#FF9580` | FG% below 40%, Discard Workout, destructive options, validation messages |
@@ -147,7 +147,7 @@ Material Symbols through `Icon` (the only `expo-symbols` import), always with a 
 
 | Screen | Key points |
 |---|---|
-| Workout (tab) | A `+` (outlined `IconButton`) in the header for New Routine, shown once a routine exists; a row of chips, one per routine (the first selected on opening); under it the selected routine's card (name and ⋮ with Rename / Move left / Move right / Delete) with its workouts as raised items (⋮ and round play, every exercise listed) and New Workout dashed; the Start Empty Workout FAB at the bottom right |
+| Workout (tab) | A `+` (outlined `IconButton`) in the header for New Routine, shown once a routine exists; a quiet routine carousel (the first routine on opening): ‹ and › (`iconMuted`, disabled at the ends; a swipe changes the tab, not the routine), the routine's name (`sectionHeader`, `textSecondary`, header role) with its ⋮ (Rename / Move left / Move right / Delete), and under them a 6 dp dot per routine (`secondaryOutline` for the shown one, `outline` for the rest; read as "Routine 2 of 3"); under it, with no card around them, the routine's workouts as compact cards (⋮ and round play, every exercise listed) and New Workout dashed; the Start Empty Workout FAB at the bottom right |
 | Active workout | Minimize, `title`, the timer; exercise cards (compact) with the exercise's media in the header (64 dp thumbnail like a list row's, left of the name; holding it floats the media over the `scrim`, playing, in a portrait box with radius 20, until release; a tap floats it with a ✕ on a `surfaceRaised` circle, closed by the ✕, a tap outside or Back), the set table, the total, Add Set, the note; Add Exercise; Discard Workout at the end; Finish Workout in the bottom bar |
 | Template editor | Like the active workout, with targets only and the exercise's name a step smaller (`body`, bold); Save in the bottom bar |
 | Tactical board editor | Full screen: Cancel (`text`), `title` "Tactical board" with the exercise under it, Save (`primaryCompact`, disabled on an empty board), the header centered against the whole two-line title block (`Screen`'s `centerHeader`); the court as wide as the screen allows with an 8 dp margin (radius 24), centered in the room above the tools; the toolbar at the bottom, in two rows: Undo and Clear (`iconMuted`, disabled with nothing to undo / no marks) in their own small `backgroundDeep` rectangle, right-aligned above; Hand / X / Arrow / Pen / Eraser centered below, in the `backgroundDeep` bar (`divider` top border) that alone spans the screen's width (one selected, filled `primary` with its icon in `onPrimary`) |

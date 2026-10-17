@@ -1,4 +1,3 @@
-import { ChipRow } from '@/components/ChipRow';
 import { EmptyState } from '@/components/EmptyState';
 import { Fab, FAB_CLEARANCE } from '@/components/Fab';
 import { IconButton } from '@/components/IconButton';
@@ -10,7 +9,8 @@ import { moveItem } from '@/domain/order';
 import { spacing } from '@/theme/spacing';
 import { createRoutine, moveRoutine, renameRoutine } from '@/features/routines/actions';
 import { useRoutines } from '@/features/routines/hooks';
-import { RoutineSection } from '@/features/routines/RoutineSection';
+import { RoutineCarousel } from '@/features/routines/RoutineCarousel';
+import { RoutineWorkouts } from '@/features/routines/RoutineWorkouts';
 import {
   discardAndStartFromTemplate,
   startEmptyWorkout,
@@ -116,35 +116,30 @@ export default function WorkoutScreen() {
         />
       ) : (
         <>
-          <ChipRow
-            options={routines.map((routine) => ({
-              value: String(routine.id),
-              label: routine.name,
-            }))}
-            value={String(selected.id)}
-            onChange={(value) => setSelectedId(Number(value))}
+          <RoutineCarousel
+            routines={routines}
+            index={selectedIndex}
+            onSelect={(index) => setSelectedId(routines[index].id)}
+            onRename={() => setDialog({ kind: 'rename', routine: selected })}
+            onMove={(delta) => {
+              // Pinned, so the carousel keeps showing it as it moves, even if it was only the default.
+              setSelectedId(selected.id);
+              moveRoutine(
+                moveItem(
+                  routines.map((routine) => routine.id),
+                  selectedIndex,
+                  delta,
+                ),
+              );
+            }}
           />
           <ScrollView
             style={styles.workouts}
             contentContainerStyle={styles.workoutsContent}
             keyboardShouldPersistTaps="handled"
           >
-            <RoutineSection
+            <RoutineWorkouts
               routine={selected}
-              index={selectedIndex}
-              count={routines.length}
-              onRename={() => setDialog({ kind: 'rename', routine: selected })}
-              onMove={(delta) => {
-                // Pinned, so the chip keeps the selection as it moves, even if it was only the default.
-                setSelectedId(selected.id);
-                moveRoutine(
-                  moveItem(
-                    routines.map((routine) => routine.id),
-                    selectedIndex,
-                    delta,
-                  ),
-                );
-              }}
               onNewWorkout={() =>
                 router.push({ pathname: '/edit-workout', params: { routineId: selected.id } })
               }

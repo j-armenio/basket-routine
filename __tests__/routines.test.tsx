@@ -157,7 +157,7 @@ describe('routines on the Workout tab', () => {
     await launch();
     const user = setupUser();
     const names = () => listRoutines(db).map((r) => r.name);
-    const chip = (name: string) => screen.queryByRole('radio', { name });
+    const shown = (name: string) => screen.queryByRole('header', { name });
 
     await user.press(screen.getByRole('button', { name: 'Push menu' }));
     expectAccessibleControls();
@@ -166,17 +166,17 @@ describe('routines on the Workout tab', () => {
     await user.clear(screen.getByLabelText('Name'));
     await user.type(screen.getByLabelText('Name'), 'Legs');
     await user.press(screen.getByRole('button', { name: 'Save' }));
-    expect(chip('Legs')).toBeSelected();
-    expect(screen.getByRole('header', { name: 'Legs' })).toBeOnTheScreen();
-    expect(chip('Push')).toBeNull();
+    expect(shown('Legs')).toBeOnTheScreen();
+    expect(shown('Push')).toBeNull();
     expect(names()).toEqual(['Legs', 'Pull']);
 
     await user.press(screen.getByRole('button', { name: 'Legs menu' }));
     expect(screen.getByRole('button', { name: 'Move left' })).toBeDisabled();
     await user.press(screen.getByRole('button', { name: 'Move right' }));
     expect(names()).toEqual(['Pull', 'Legs']);
-    // the selection follows the routine it moved
-    expect(chip('Legs')).toBeSelected();
+    // the carousel keeps showing the routine it moved, now the second of two
+    expect(shown('Legs')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Routine 2 of 2')).toBeOnTheScreen();
 
     await user.press(screen.getByRole('button', { name: 'Legs menu' }));
     expect(screen.getByRole('button', { name: 'Move right' })).toBeDisabled();
@@ -187,36 +187,44 @@ describe('routines on the Workout tab', () => {
     await pressAlert('Delete');
 
     // the deleted routine was the selected one: back to the first
-    expect(chip('Legs')).toBeNull();
-    expect(chip('Pull')).toBeSelected();
+    expect(shown('Legs')).toBeNull();
+    expect(shown('Pull')).toBeOnTheScreen();
     expect(names()).toEqual(['Pull']);
     expect(getRoutine(db, push.id)?.archivedAt).toBeInstanceOf(Date);
     expect(listWorkouts(db, push.id)).toEqual([]);
     expect(getRoutine(db, pull.id)?.archivedAt).toBeNull();
   });
 
-  test('the chips switch which routine shows; a new routine becomes the selected one', async () => {
+  test('the arrows step through the routines; a new routine becomes the shown one', async () => {
     seedRoutine('Push', ['Push day']);
     seedRoutine('Legs', ['Leg day']);
     await launch();
     const user = setupUser();
+    const previous = () => screen.getByRole('button', { name: 'Previous routine' });
+    const next = () => screen.getByRole('button', { name: 'Next routine' });
 
     // opens on the first routine
-    expect(screen.getByRole('radio', { name: 'Push' })).toBeSelected();
+    expect(screen.getByRole('header', { name: 'Push' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('Routine 1 of 2')).toBeOnTheScreen();
+    expect(previous()).toBeDisabled();
     expect(screen.getByText('Push day')).toBeOnTheScreen();
     expect(screen.queryByText('Leg day')).toBeNull();
     expectAccessibleControls();
 
-    await user.press(screen.getByRole('radio', { name: 'Legs' }));
-    expect(screen.getByRole('radio', { name: 'Legs' })).toBeSelected();
-    expect(screen.getByRole('radio', { name: 'Push' })).not.toBeSelected();
+    await user.press(next());
+    expect(screen.getByRole('header', { name: 'Legs' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('Routine 2 of 2')).toBeOnTheScreen();
+    expect(next()).toBeDisabled();
     expect(screen.getByText('Leg day')).toBeOnTheScreen();
     expect(screen.queryByText('Push day')).toBeNull();
     expectAccessibleControls();
 
+    await user.press(previous());
+    expect(screen.getByRole('header', { name: 'Push' })).toBeOnTheScreen();
+
     await newRoutine(user, 'Core');
-    expect(screen.getByRole('radio', { name: 'Core' })).toBeSelected();
     expect(screen.getByRole('header', { name: 'Core' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('Routine 3 of 3')).toBeOnTheScreen();
     expect(screen.queryByText('Leg day')).toBeNull();
     expect(listRoutines(db).map((r) => r.name)).toEqual(['Push', 'Legs', 'Core']);
   });

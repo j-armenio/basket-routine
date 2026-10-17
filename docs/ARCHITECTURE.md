@@ -9,7 +9,7 @@ O `Stack` raiz (`app/_layout.tsx`) contém as abas e as telas acima delas.
 
 | Rota | Arquivo | Papel |
 |---|---|---|
-| `/` | `app/(tabs)/index.tsx` | Aba Workout: chips de rotina (a selecionada mostra seus workouts), `+` de New Routine no cabeçalho e o FAB Start Empty Workout |
+| `/` | `app/(tabs)/index.tsx` | Aba Workout: carrossel de rotinas (‹ nome ⋮ › e pontinhos; a rotina mostrada lista seus workouts abaixo), `+` de New Routine no cabeçalho e o FAB Start Empty Workout |
 | `/exercises` | `app/(tabs)/exercises.tsx` | Aba Exercises: busca + cards de categoria (5 categorias + Custom) |
 | `/profile` | `app/(tabs)/profile.tsx` | Aba Profile: botão de Settings, perfil, estatísticas, gráfico de FG%, últimas 5 sessões |
 | — | `app/(tabs)/_layout.tsx` | Abas (`js-top-tabs` com a barra embaixo, swipe entre abas, `ResumeBanner`) |
@@ -82,7 +82,7 @@ versão, `run`, `ActionResult`).
 | Pasta | Conteúdo |
 |---|---|
 | `workout/` | Treino ativo: `ExerciseCard`, linhas de set (`ShootingSetRow`, `CheckSetRow`, `SetNumber`), `useNumberCell` + `setDraft` (salvar a cada tecla, desfazer no blur), `setTable` (colunas), `SetTableHeader`, `ExerciseNote`, `ResumeBanner`, `TargetModeSheet`, `navigation.ts` (`leaveScreen`) |
-| `routines/` | Rotinas e templates: `RoutineSection`, `WorkoutCard`, `RoutineChoiceSection`, lista arrastável de exercícios (`DraggableExerciseList`), o editor (`templateDraft.ts`, `draftStore.ts`, `loadDraft.ts`, `TemplateExerciseCard`, `TemplateSetRow`) |
+| `routines/` | Rotinas e templates: `RoutineCarousel` (seletor de rotina da aba Workout), `RoutineWorkouts` (os workouts da rotina mostrada), `WorkoutCard`, `RoutineChoiceSection`, lista arrastável de exercícios (`DraggableExerciseList`), o editor (`templateDraft.ts`, `draftStore.ts`, `loadDraft.ts`, `TemplateExerciseCard`, `TemplateSetRow`) |
 | `history/` | Histórico: `historyList.ts` (itens, agrupamento por mês, dados do gráfico, estatísticas do perfil), `HistoryRow`, `MonthHeader`, `SessionTotals`, `SessionExerciseView`, `FgChart`, `FgEvolutionCard` |
 | `exercises/` | Catálogo: `catalogList.ts`, `CategoryCard` + `categoryImages.ts`, `ExerciseList`, `ExerciseRow`, `ExerciseThumbnail` (a mídia no cabeçalho dos cards do treino ativo e do editor de template), `ExerciseStatsCard`, mídia (`MediaView`, `mediaSource`, `mediaFiles`, `seedMedia`, `videoThumbnail`) |
 | `profile/` | Perfil: `profileStorage.ts` (nome e foto no `expo-sqlite/kv-store`, fora do schema), `actions.ts`, `hooks.ts`, `Avatar`, `ProfileCard`, `ProfileStatsCard`, `profileText.ts` |
