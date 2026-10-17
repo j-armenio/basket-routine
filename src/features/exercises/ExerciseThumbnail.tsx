@@ -4,6 +4,7 @@ import { opacity, radius, size, spacing } from '@/theme/spacing';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useExercise } from './hooks';
 import { exerciseMedia, type MediaSource } from './mediaSource';
 import { MediaPlaceholder, MediaView } from './MediaView';
@@ -16,6 +17,9 @@ type ExerciseThumbnailProps = {
 
 /** How the floating media was opened: held (it closes on release) or tapped (it stays). */
 type Floating = 'held' | 'pinned';
+
+/** How long the finger rests on the thumbnail before a hold opens the media. */
+const HOLD_MS = 250;
 
 /**
  * An exercise's media as a still thumbnail in a workout card's header (the active workout and the
@@ -30,23 +34,41 @@ export function ExerciseThumbnail({ exerciseId, name }: ExerciseThumbnailProps) 
   const [floating, setFloating] = useState<Floating | null>(null);
   const media = exercise && exerciseMedia(exercise);
 
+  // The hold is a gesture-handler pan that activates once the finger has rested `HOLD_MS`. Active,
+  // it owns the touch until the finger lifts: the screen's scroll view can't take it over as the
+  // finger drifts while watching, which used to end a `Pressable` long press at random. Moving
+  // before then fails it, so a scroll that starts on the thumbnail still scrolls. A tap stays on
+  // the `Pressable` (also what TalkBack activates); the hold's activation cancels the `Pressable`'s
+  // touch, so its release isn't taken for a tap.
+  const hold = Gesture.Pan()
+    .activateAfterLongPress(HOLD_MS)
+    .runOnJS(true)
+    .onStart(() => setFloating('held'))
+    .onFinalize(() => setFloating((current) => (current === 'held' ? null : current)))
+    .withTestId(`media-hold-${exerciseId}`);
+
   if (!media) return <MediaPlaceholder style={styles.thumb} iconSize={size.iconLarge} />;
   const close = () => setFloating(null);
   return (
     <>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('exercises.playMediaFor', { name })}
-        accessibilityHint={t('exercises.holdToPlay')}
-        onPress={() => setFloating('pinned')}
-        delayLongPress={250}
-        onLongPress={() => setFloating('held')}
-        // Only a hold closes on release: a tap's own release comes before its `onPress`.
-        onPressOut={() => setFloating((current) => (current === 'held' ? null : current))}
-        style={({ pressed }) => pressed && styles.pressed}
-      >
-        <MediaView media={media} playing={false} style={styles.thumb} iconSize={size.iconLarge} />
-      </Pressable>
+      <GestureDetector gesture={hold}>
+        <View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('exercises.playMediaFor', { name })}
+            accessibilityHint={t('exercises.holdToPlay')}
+            onPress={() => setFloating((current) => current ?? 'pinned')}
+            style={({ pressed }) => pressed && styles.pressed}
+          >
+            <MediaView
+              media={media}
+              playing={false}
+              style={styles.thumb}
+              iconSize={size.iconLarge}
+            />
+          </Pressable>
+        </View>
+      </GestureDetector>
       <FloatingMedia media={media} mode={floating} onClose={close} />
     </>
   );

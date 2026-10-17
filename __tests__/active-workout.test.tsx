@@ -1,4 +1,4 @@
-import { sessionExercises, sessions } from '@/db/schema';
+import { exercises, sessionExercises, sessions } from '@/db/schema';
 import { getInProgressSession, getSessionDetail } from '@/db/repositories/sessions';
 import { useDatabaseSetup } from '@/db/useDatabaseSetup';
 import type { Db } from '@/db/types';
@@ -6,9 +6,12 @@ import { notifyDataChanged } from '@/features/dataStore';
 import { darkColors as colors } from '@/theme/colors';
 import { act, cleanup, fireEvent, screen, userEvent, within } from '@testing-library/react-native';
 import { AndroidHaptics, performAndroidHapticsAsync } from 'expo-haptics';
+import { eq } from 'drizzle-orm';
 import { renderRouter } from 'expo-router/testing-library';
 import { expectAccessibleControls } from '@/test-utils/a11y';
 import { Alert } from 'react-native';
+import { State } from 'react-native-gesture-handler';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 
 // Same mocks as shell.test.tsx: a real in-memory DB with the real migrations, seeded like at
 // startup, and no expo-sqlite migration hook.
@@ -243,6 +246,9 @@ test('exercises: move one up and remove another after confirming', async () => {
   expect(names()).toEqual(['Figure 8']);
 });
 
+const exerciseIdOf = (seedKey: string) =>
+  db.select().from(exercises).where(eq(exercises.seedKey, seedKey)).get()!.id;
+
 test("an exercise card's media floats: a tap keeps it open, a hold only while held", async () => {
   const app = await launch();
   const user = setupUser();
@@ -261,12 +267,29 @@ test("an exercise card's media floats: a tap keeps it open, a hold only while he
   await user.press(screen.getByRole('button', { name: 'Close dialog' }));
   expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
 
-  // A hold: open with no ✕ while held, gone on release.
-  await act(async () => fireEvent(thumbnail, 'longPress'));
+  // A hold: open with no ✕ while held, gone on release. `fireGestureHandler` always runs a
+  // gesture through to its end, so the held state is checked through the gesture's own callbacks.
+  const hold = getByGestureTestId(`media-hold-${exerciseIdOf('free_throws')}`) as unknown as {
+    handlers: { onStart: () => void; onFinalize: () => void };
+  };
+  await act(async () => hold.handlers.onStart());
   expect(screen.getByTestId('floating-media')).toBeOnTheScreen();
   expect(screen.queryByRole('button', { name: 'Close' })).not.toBeOnTheScreen();
-  await act(async () => fireEvent(thumbnail, 'pressOut'));
+  await act(async () => hold.handlers.onFinalize());
   expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
+
+  // A whole hold, the finger drifting on the way, ends closed, and the next tap still pins it.
+  await act(async () =>
+    fireGestureHandler(getByGestureTestId(`media-hold-${exerciseIdOf('free_throws')}`), [
+      { state: State.BEGAN },
+      { state: State.ACTIVE },
+      { state: State.ACTIVE, translationY: 40 },
+      { state: State.END },
+    ]),
+  );
+  expect(screen.queryByTestId('floating-media')).not.toBeOnTheScreen();
+  await user.press(thumbnail);
+  expect(screen.getByRole('button', { name: 'Close' })).toBeOnTheScreen();
 });
 
 test('the picker searches by part of the name and the close button adds nothing', async () => {
