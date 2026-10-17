@@ -43,6 +43,7 @@ yarn-error.*
 
 # personal notes
 docs/zz.md
+docs/prompt.md
 
 # exercise media sources and their optimized output (see scripts/optimize-exercise-media.sh)
 media-source/*
